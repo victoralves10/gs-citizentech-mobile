@@ -6,14 +6,20 @@ import { useTema } from "../theme/TemaContext";
 type Props = {
     children: ReactNode;
     rolar?: boolean;
+    comCabecalho?: boolean;
 };
 
-export default function TelaBase({ children, rolar = true }: Props) {
+export default function TelaBase({ children, rolar = true, comCabecalho = false }: Props) {
     const { cores } = useTema();
 
     return (
-        // SafeAreaView: deixa o conteúdo fora do relógio/câmera do celular
-        <SafeAreaView style={[estilos.tela, { backgroundColor: cores.fundo }]}>
+        // SafeAreaView: deixa o conteúdo fora do relógio/câmera do celular.
+        // edges = quais bordas ele protege. Se a tela já tem cabeçalho, o próprio
+        // cabeçalho já desvia do relógio, então não precisa proteger o topo de novo.
+        <SafeAreaView
+            edges={comCabecalho ? [] : ["top"]}
+            style={[estilos.tela, { backgroundColor: cores.fundo }]}
+        >
             {/* KeyboardAvoidingView: empurra o conteúdo para cima quando o teclado abre (iPhone) */}
             <KeyboardAvoidingView
                 style={estilos.tela}
