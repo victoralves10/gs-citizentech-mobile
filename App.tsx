@@ -1,88 +1,107 @@
+import { useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { TemaProvider, useTema, PreferenciaTema } from "./src/theme/TemaContext";
-import { Cores } from "./src/theme/cores";
+import { StyleSheet, Text, View } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { TemaProvider, useTema } from "./src/theme/TemaContext";
+import TelaBase from "./src/components/TelaBase";
+import CampoTexto from "./src/components/CampoTexto";
+import Botao from "./src/components/Botao";
+import ToastTema from "./src/components/ToastTema";
+import { toastAviso, toastErro, toastSucesso } from "./src/utils/toast";
 
 export default function App() {
     return (
-        <TemaProvider>
-            <TesteTema />
-        </TemaProvider>
+        <SafeAreaProvider>
+            <TemaProvider>
+                <TesteComponentes />
+                <ToastTema />
+            </TemaProvider>
+        </SafeAreaProvider>
     );
 }
 
-// as 3 opções que aparecem nos botões
-const OPCOES: PreferenciaTema[] = ["automatico", "claro", "escuro"];
+// tela de teste dos componentes
+function TesteComponentes() {
+    const { cores, escuro, mudarPreferencia } = useTema();
 
-// tela de teste do tema
-function TesteTema() {
-    // pega o tema atual do Context
-    const { cores, escuro, preferencia, mudarPreferencia } = useTema();
+    // o que foi digitado nos campos
+    const [email, setEmail] = useState("");
+    const [senha, setSenha] = useState("");
 
-    // monta os estilos com as cores do tema atual
-    const estilos = criarEstilos(cores);
+    // se o botão "Entrar" está carregando
+    const [carregando, setCarregando] = useState(false);
+
+    // simula um login: espera 2 segundos e mostra um toast
+    function testarCarregando() {
+        setCarregando(true);
+        setTimeout(() => {
+            setCarregando(false);
+            toastSucesso("Deu certo!");
+        }, 2000);
+    }
 
     return (
-        <View style={estilos.container}>
-            <Text style={estilos.titulo}>Teste do tema</Text>
-            <Text style={estilos.texto}>Agora o app está {escuro ? "escuro" : "claro"}.</Text>
+        <TelaBase>
+            <Text style={[estilos.titulo, { color: cores.texto }]}>Teste dos componentes</Text>
 
-            {/* um botão para cada opção. map() = repete o bloco para cada item da lista */}
-            {OPCOES.map((opcao) => (
-                <Pressable
-                    key={opcao}
-                    style={[estilos.botao, preferencia === opcao && estilos.botaoAtivo]}
-                    onPress={() => mudarPreferencia(opcao)}
-                >
-                    <Text style={[estilos.textoBotao, preferencia === opcao && estilos.textoAtivo]}>
-                        {opcao}
-                    </Text>
-                </Pressable>
-            ))}
+            <CampoTexto
+                rotulo="E-mail"
+                icone="mail-outline"
+                placeholder="seu@email.com"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+            />
 
-            {/* barra de cima do celular: texto claro no tema escuro e escuro no claro */}
+            <CampoTexto
+                rotulo="Senha"
+                icone="lock-closed-outline"
+                placeholder="Sua senha"
+                value={senha}
+                onChangeText={setSenha}
+                senha
+                erro={senha.length > 0 && senha.length < 6 ? "Mínimo de 6 caracteres." : undefined}
+            />
+
+            <Botao texto="Testar carregando" onPress={testarCarregando} carregando={carregando} />
+            <Botao
+                texto="Toast de erro"
+                variante="contorno"
+                onPress={() => toastErro("Deu erro!")}
+            />
+            <Botao
+                texto="Toast de aviso"
+                variante="contorno"
+                onPress={() => toastAviso("Só um aviso.")}
+            />
+
+            <View style={estilos.linha}>
+                <Botao
+                    texto="Claro"
+                    variante="contorno"
+                    onPress={() => mudarPreferencia("claro")}
+                />
+                <Botao
+                    texto="Escuro"
+                    variante="contorno"
+                    onPress={() => mudarPreferencia("escuro")}
+                />
+            </View>
+
             <StatusBar style={escuro ? "light" : "dark"} />
-        </View>
+        </TelaBase>
     );
 }
 
-// os estilos recebem as cores- assim eles mudam quando o tema muda
-function criarEstilos(cores: Cores) {
-    return StyleSheet.create({
-        container: {
-            flex: 1,
-            backgroundColor: cores.fundo,
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 12,
-        },
-        titulo: {
-            fontSize: 22,
-            fontWeight: "bold",
-            color: cores.texto,
-        },
-        texto: {
-            color: cores.textoSecundario,
-        },
-        botao: {
-            width: 200,
-            padding: 12,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: cores.borda,
-            backgroundColor: cores.superficie,
-            alignItems: "center",
-        },
-        botaoAtivo: {
-            backgroundColor: cores.primaria,
-            borderColor: cores.primaria,
-        },
-        textoBotao: {
-            color: cores.texto,
-            fontWeight: "600",
-        },
-        textoAtivo: {
-            color: cores.textoSobreCor,
-        },
-    });
-}
+const estilos = StyleSheet.create({
+    titulo: {
+        fontSize: 22,
+        fontWeight: "bold",
+    },
+    linha: {
+        flexDirection: "row",
+        justifyContent: "center",
+        gap: 12,
+    },
+});
