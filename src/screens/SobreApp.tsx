@@ -3,6 +3,7 @@ import Constants from "expo-constants";
 import TelaBase from "../components/TelaBase";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
+import { isRunningInExpoGo } from "expo";
 
 // integrantes do grupo
 const EQUIPE = [
@@ -20,10 +21,7 @@ export default function SobreApp() {
     const versao = Constants.expoConfig?.version ?? "-";
     const commit = Constants.expoConfig?.extra?.commit ?? "-";
     const dataBuild = Constants.expoConfig?.extra?.dataBuild ?? "-";
-    const ambiente =
-        Constants.executionEnvironment === "storeClient"
-            ? "Expo Go (desenvolvimento)"
-            : "App instalado";
+    const ambiente = isRunningInExpoGo() ? "Expo Go (desenvolvimento)" : "App instalado";
 
     return (
         <TelaBase comCabecalho>
