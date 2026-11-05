@@ -6,6 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import { useTema } from "../theme/TemaContext";
 import { useAuth } from "../context/AuthContext";
 import { ListaDeTelas } from "./tipos";
+import Carregando from "../components/Carregando";
 
 import Login from "../screens/Login";
 import Cadastro from "../screens/Cadastro";
@@ -64,7 +65,7 @@ function Abas() {
 // A navegação completa do app
 export default function Rotas() {
     const { cores, escuro } = useTema();
-    const { logado } = useAuth();
+    const { logado, carregando } = useAuth();
 
     const temaBase = escuro ? DarkTheme : DefaultTheme;
     const temaNavegacao = {
@@ -78,6 +79,10 @@ export default function Rotas() {
             primary: cores.primaria,
         },
     };
+
+    if (carregando) {
+        return <Carregando texto="Abrindo o app..." />;
+    }
 
     return (
         <NavigationContainer theme={temaNavegacao}>
