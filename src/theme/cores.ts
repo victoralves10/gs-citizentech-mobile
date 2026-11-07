@@ -1,5 +1,3 @@
-// CORES DO APP
-// Todas as cores ficam aqui. Nenhuma tela escreve uma cor "na mão"
 export type Cores = {
     // fundos
     fundo: string; // fundo da tela
@@ -21,6 +19,11 @@ export type Cores = {
     sucesso: string;
     erro: string;
     alerta: string;
+
+    // cores de apoio
+    alertaTexto: string; // texto em cima de um fundo amarelo (o amarelo puro fica ilegível)
+    secundariaTexto: string; // texto em cima de um fundo da cor secundária
+    fundoSegmentado: string; // fundo da barrinha de opções (Automático / Claro / Escuro)
 };
 
 // Tema claro (tons de céu de dia)
@@ -41,6 +44,10 @@ export const coresClaras: Cores = {
     sucesso: "#2E9D5B",
     erro: "#E5484D",
     alerta: "#F5A524",
+
+    alertaTexto: "#9A6700",
+    secundariaTexto: "#00838F",
+    fundoSegmentado: "#E3EAF3",
 };
 
 // Tema escuro (tons de céu de noite)
@@ -61,4 +68,16 @@ export const coresEscuras: Cores = {
     sucesso: "#4CC38A",
     erro: "#FF6B6B",
     alerta: "#FFC53D",
+
+    alertaTexto: "#FFC53D",
+    secundariaTexto: "#26C6DA",
+    fundoSegmentado: "#1B2940",
 };
+
+export function transparente(cor: string, opacidade: number) {
+    // 0.12 → 31 (de 0 a 255) → "1f" (em hexadecimal, com 2 dígitos)
+    const alfa = Math.round(opacidade * 255)
+        .toString(16)
+        .padStart(2, "0");
+    return cor + alfa;
+}
