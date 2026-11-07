@@ -10,9 +10,10 @@ type Props = {
     texto: string;
     cor?: CorDoSelo;
     icone?: keyof typeof Ionicons.glyphMap;
+    centralizado?: boolean;
 };
 
-export default function Selo({ texto, cor = "primaria", icone }: Props) {
+export default function Selo({ texto, cor = "primaria", icone, centralizado = false }: Props) {
     const { cores } = useTema();
 
     // para cada nome de cor: [cor do fundo, cor do texto]
@@ -28,7 +29,13 @@ export default function Selo({ texto, cor = "primaria", icone }: Props) {
     const [corFundo, corTexto] = paleta[cor];
 
     return (
-        <View style={[estilos.selo, { backgroundColor: transparente(corFundo, 0.15) }]}>
+        <View
+            style={[
+                estilos.selo,
+                centralizado && estilos.centralizado,
+                { backgroundColor: transparente(corFundo, 0.15) },
+            ]}
+        >
             {icone && <Ionicons name={icone} size={12} color={corTexto} />}
             <Text style={[estilos.texto, { color: corTexto }]}>{texto}</Text>
         </View>
@@ -45,6 +52,9 @@ const estilos = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 3,
         borderRadius: 999, // bem arredondado = formato de pílula
+    },
+    centralizado: {
+        alignSelf: "center",
     },
     texto: {
         fontSize: 11,

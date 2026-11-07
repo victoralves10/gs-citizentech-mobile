@@ -1,11 +1,14 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import TelaBase from "../components/TelaBase";
+import TelaAuth from "../components/TelaAuth";
 import CampoTexto from "../components/CampoTexto";
 import Botao from "../components/Botao";
+import Selo from "../components/Selo";
+import TextoComLink from "../components/TextoComLink";
 import { useTema } from "../theme/TemaContext";
 import { useLogin } from "../hooks/useLogin";
 import { USAR_MOCK } from "../services/auth/authService";
+import { toastAviso } from "../utils/toast";
 import { Cores } from "../theme/cores";
 
 export default function Login() {
@@ -16,13 +19,22 @@ export default function Login() {
     // tudo que a tela precisa vem do hook
     const { email, setEmail, senha, setSenha, erros, carregando, enviar } = useLogin();
 
-    return (
-        <TelaBase>
-            <View style={estilos.topo}>
-                <Text style={estilos.titulo}>Entrar</Text>
-                <Text style={estilos.subtitulo}>Acesse sua conta para continuar.</Text>
-            </View>
+    // selo do usuário de teste: só aparece enquanto o login é falso (mock)
+    const rodape = USAR_MOCK ? (
+        <Selo
+            texto="Modo teste: teste@gs.com / 123456"
+            cor="neutro"
+            icone="flask-outline"
+            centralizado
+        />
+    ) : undefined;
 
+    return (
+        <TelaAuth
+            titulo="Bem-vindo de volta 👋"
+            subtitulo="Entre para ver o clima dos seus locais."
+            rodape={rodape}
+        >
             <CampoTexto
                 rotulo="E-mail"
                 icone="mail-outline"
@@ -43,39 +55,36 @@ export default function Login() {
                 senha
             />
 
-            <Botao texto="Entrar" onPress={enviar} carregando={carregando} />
-            <Botao
-                texto="Criar conta"
-                variante="contorno"
+            {/* ainda não existe recuperação de senha: só avisa */}
+            <Pressable
+                style={estilos.esqueceu}
+                hitSlop={10}
+                onPress={() => toastAviso("Recuperação de senha em breve.")}
+            >
+                <Text style={estilos.textoEsqueceu}>Esqueceu sua senha?</Text>
+            </Pressable>
+
+            <Botao texto="Entrar" icone="log-in-outline" onPress={enviar} carregando={carregando} />
+
+            <TextoComLink
+                texto="Não tem uma conta?"
+                link="Cadastre-se"
                 onPress={() => navigation.navigate("Cadastro")}
             />
-
-            {/* dica que só aparece enquanto o login é falso (mock) */}
-            {USAR_MOCK && <Text style={estilos.dica}>Modo teste: teste@gs.com / 123456</Text>}
-        </TelaBase>
+        </TelaAuth>
     );
 }
 
 function criarEstilos(cores: Cores) {
     return StyleSheet.create({
-        topo: {
-            marginTop: 40,
-            marginBottom: 16,
-            gap: 6,
+        esqueceu: {
+            alignSelf: "flex-end", // joga o link para a direita
+            marginTop: -6, // gruda um pouco no campo de senha
         },
-        titulo: {
-            fontSize: 30,
-            fontWeight: "bold",
-            color: cores.texto,
-        },
-        subtitulo: {
-            fontSize: 15,
-            color: cores.textoSecundario,
-        },
-        dica: {
-            textAlign: "center",
+        textoEsqueceu: {
             fontSize: 13,
-            color: cores.textoSuave,
+            fontWeight: "700",
+            color: cores.primaria,
         },
     });
 }

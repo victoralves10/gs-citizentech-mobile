@@ -117,7 +117,7 @@ export default function Rotas() {
                         <Pilha.Screen
                             name="Cadastro"
                             component={Cadastro}
-                            options={{ title: "" }}
+                            options={{ headerShown: false }}
                         />
                     </>
                 )}

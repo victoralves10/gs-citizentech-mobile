@@ -1,15 +1,11 @@
-import { StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import TelaBase from "../components/TelaBase";
+import TelaAuth from "../components/TelaAuth";
 import CampoTexto from "../components/CampoTexto";
 import Botao from "../components/Botao";
-import { useTema } from "../theme/TemaContext";
+import TextoComLink from "../components/TextoComLink";
 import { useCadastro } from "../hooks/useCadastro";
-import { Cores } from "../theme/cores";
 
 export default function Cadastro() {
-    const { cores } = useTema();
-    const estilos = criarEstilos(cores);
     const navigation = useNavigation();
 
     const {
@@ -27,12 +23,11 @@ export default function Cadastro() {
     } = useCadastro();
 
     return (
-        <TelaBase comCabecalho>
-            <View style={estilos.topo}>
-                <Text style={estilos.titulo}>Criar conta</Text>
-                <Text style={estilos.subtitulo}>Preencha seus dados para começar.</Text>
-            </View>
-
+        <TelaAuth
+            titulo="Crie sua conta ☀️"
+            subtitulo="Salve seus locais e receba avisos quando o tempo mudar."
+            onVoltar={() => navigation.goBack()}
+        >
             <CampoTexto
                 rotulo="Nome"
                 icone="person-outline"
@@ -70,27 +65,14 @@ export default function Cadastro() {
                 senha
             />
 
-            <Botao texto="Cadastrar" onPress={enviar} carregando={carregando} />
-            <Botao texto="Já tenho conta" variante="contorno" onPress={() => navigation.goBack()} />
-        </TelaBase>
-    );
-}
+            <Botao
+                texto="Criar conta"
+                icone="person-add-outline"
+                onPress={enviar}
+                carregando={carregando}
+            />
 
-function criarEstilos(cores: Cores) {
-    return StyleSheet.create({
-        topo: {
-            marginTop: 8,
-            marginBottom: 16,
-            gap: 6,
-        },
-        titulo: {
-            fontSize: 30,
-            fontWeight: "bold",
-            color: cores.texto,
-        },
-        subtitulo: {
-            fontSize: 15,
-            color: cores.textoSecundario,
-        },
-    });
+            <TextoComLink texto="Já tem conta?" link="Entrar" onPress={() => navigation.goBack()} />
+        </TelaAuth>
+    );
 }

@@ -1,5 +1,6 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
@@ -9,6 +10,7 @@ type Props = {
     variante?: "principal" | "contorno";
     carregando?: boolean;
     desabilitado?: boolean;
+    icone?: keyof typeof Ionicons.glyphMap; // ícone opcional ao lado do texto
 };
 
 export default function Botao({
@@ -17,6 +19,7 @@ export default function Botao({
     variante = "principal",
     carregando = false,
     desabilitado = false,
+    icone,
 }: Props) {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
@@ -27,11 +30,14 @@ export default function Botao({
     // cor da rodinha e do texto: branco no principal, cor do tema no contorno
     const corDoTexto = variante === "principal" ? cores.textoSobreCor : cores.primaria;
 
-    // o que aparece dentro do botão: rodinha ou texto
+    // o que aparece dentro do botão: rodinha ou (ícone +) texto
     const conteudo = carregando ? (
         <ActivityIndicator color={corDoTexto} />
     ) : (
-        <Text style={[estilos.texto, { color: corDoTexto }]}>{texto}</Text>
+        <View style={estilos.linha}>
+            {icone && <Ionicons name={icone} size={20} color={corDoTexto} />}
+            <Text style={[estilos.texto, { color: corDoTexto }]}>{texto}</Text>
+        </View>
     );
 
     // botão de contorno: sem degradê
@@ -77,6 +83,11 @@ function criarEstilos(cores: Cores) {
         },
         bloqueado: {
             opacity: 0.6, // fica meio apagado
+        },
+        linha: {
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
         },
         texto: {
             fontSize: 16,
