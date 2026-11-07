@@ -11,10 +11,10 @@ import Carregando from "../components/Carregando";
 import Login from "../screens/Login";
 import Cadastro from "../screens/Cadastro";
 import Home from "../screens/Home";
-import Tela1 from "../screens/Tela1";
-import Tela2 from "../screens/Tela2";
-import Tela3 from "../screens/Tela3";
-import Tela4 from "../screens/Tela4";
+import MeusLocais from "../screens/MeusLocais";
+import Pesquisa from "../screens/Pesquisa";
+import Alertas from "../screens/Alertas";
+import DetalhesLocal from "../screens/DetalhesLocal";
 import Perfil from "../screens/Perfil";
 import SobreApp from "../screens/SobreApp";
 
@@ -25,9 +25,9 @@ const Aba = createBottomTabNavigator<ListaDeTelas>();
 // ícone de cada aba (nome da tela → nome do ícone)
 const ICONES_DAS_ABAS = {
     Home: "home-outline",
-    Tela1: "grid-outline",
-    Tela2: "list-outline",
-    Tela3: "map-outline",
+    MeusLocais: "location-outline",
+    Pesquisa: "search-outline",
+    Alertas: "notifications-outline",
     Perfil: "person-outline",
 } as const;
 
@@ -54,9 +54,13 @@ function Abas() {
             })}
         >
             <Aba.Screen name="Home" component={Home} />
-            <Aba.Screen name="Tela1" component={Tela1} options={{ title: "Tela 1" }} />
-            <Aba.Screen name="Tela2" component={Tela2} options={{ title: "Tela 2" }} />
-            <Aba.Screen name="Tela3" component={Tela3} options={{ title: "Tela 3" }} />
+            <Aba.Screen
+                name="MeusLocais"
+                component={MeusLocais}
+                options={{ title: "Meus locais" }}
+            />
+            <Aba.Screen name="Pesquisa" component={Pesquisa} />
+            <Aba.Screen name="Alertas" component={Alertas} />
             <Aba.Screen name="Perfil" component={Perfil} />
         </Aba.Navigator>
     );
@@ -96,9 +100,9 @@ export default function Rotas() {
                             options={{ headerShown: false }}
                         />
                         <Pilha.Screen
-                            name="Tela4"
-                            component={Tela4}
-                            options={{ title: "Tela 4" }}
+                            name="DetalhesLocal"
+                            component={DetalhesLocal}
+                            options={{ title: "Detalhes do local" }}
                         />
                         <Pilha.Screen
                             name="SobreApp"

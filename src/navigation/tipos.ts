@@ -6,13 +6,13 @@ export type ListaDeTelas = {
     // abas de baixo (com login)
     Abas: undefined;
     Home: undefined;
-    Tela1: undefined;
-    Tela2: undefined;
-    Tela3: undefined;
+    MeusLocais: undefined;
+    Pesquisa: undefined;
+    Alertas: undefined;
     Perfil: undefined;
 
     // telas que abrem por cima das abas (com login)
-    Tela4: undefined;
+    DetalhesLocal: undefined;
     SobreApp: undefined;
 };
 
