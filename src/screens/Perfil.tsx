@@ -141,9 +141,9 @@ export default function Perfil() {
                     />
                     <ItemLista
                         divisor
-                        titulo="Sobre o App"
-                        icone="information-circle-outline"
-                        onPress={() => navigation.navigate("SobreApp")}
+                        titulo="Ver apresentação de novo"
+                        icone="play-circle-outline"
+                        onPress={() => navigation.navigate("Apresentacao")}
                     />
                     <ItemLista
                         divisor

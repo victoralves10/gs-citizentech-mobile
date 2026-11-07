@@ -5,9 +5,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { useTema } from "../theme/TemaContext";
 import { useAuth } from "../context/AuthContext";
+import { useApresentacao } from "../context/ApresentacaoContext";
 import { ListaDeTelas } from "./tipos";
 import Carregando from "../components/Carregando";
 
+import Apresentacao from "../screens/Apresentacao";
 import Login from "../screens/Login";
 import Cadastro from "../screens/Cadastro";
 import Home from "../screens/Home";
@@ -70,7 +72,10 @@ function Abas() {
 export default function Rotas() {
     const { cores, escuro } = useTema();
     const { logado, carregando } = useAuth();
-
+    const { jaViuApresentacao } = useApresentacao();
+    // O React Navigation tem o próprio tema (cor de fundo, do cabeçalho...).
+    // Aqui a gente pega o tema padrão dele (claro ou escuro) e troca as cores
+    // pelas nossas. O "..." copia tudo que já existe e só substitui o que a gente escreveu.
     const temaBase = escuro ? DarkTheme : DefaultTheme;
     const temaNavegacao = {
         ...temaBase,
@@ -84,7 +89,9 @@ export default function Rotas() {
         },
     };
 
-    if (carregando) {
+    // enquanto confere a sessão salva e o sinal da apresentação, mostra a rodinha
+    // (senão o Login piscaria na tela antes de entrar no app)
+    if (carregando || jaViuApresentacao === null) {
         return <Carregando texto="Abrindo o app..." />;
     }
 
@@ -109,10 +116,25 @@ export default function Rotas() {
                             component={SobreApp}
                             options={{ title: "Sobre o App" }}
                         />
+                        <Pilha.Screen
+                            name="Apresentacao"
+                            component={Apresentacao}
+                            options={{ headerShown: false }}
+                        />
                     </>
                 ) : (
                     // ---------- telas de FORA (sem login) ----------
                     <>
+                        {/* nunca viu a apresentação: ela entra PRIMEIRO na lista (é a tela inicial).
+                            Ao tocar em "Começar", jaViuApresentacao vira true, ela sai da lista
+                            e o app mostra o Login sozinho. */}
+                        {!jaViuApresentacao && (
+                            <Pilha.Screen
+                                name="Apresentacao"
+                                component={Apresentacao}
+                                options={{ headerShown: false }}
+                            />
+                        )}
                         <Pilha.Screen
                             name="Login"
                             component={Login}

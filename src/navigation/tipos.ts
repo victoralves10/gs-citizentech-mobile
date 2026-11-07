@@ -1,5 +1,6 @@
 export type ListaDeTelas = {
     // telas de fora (sem login)
+    Apresentacao: undefined; // boas-vindas da primeira abertura
     Login: undefined;
     Cadastro: undefined;
 
