@@ -1,3 +1,17 @@
+// ============================================================================
+// CLIMA (tipos da API → ícone e cor)
+// A API manda o "tipo" das coisas (CHUVA, CALOR, ALTA...). O app só escolhe
+// o ícone e a cor de cada tipo. Todas as telas usam estas funções, então
+// para trocar um ícone é só mexer aqui.
+//
+// Exemplos:
+//   iconeDoClima("CHUVA", true)        → "rainy"
+//   iconeDoClima("CEU_LIMPO", false)   → "moon"     (de noite)
+//   iconeDoAlerta("CALOR")             → "thermometer"
+//   corDaGravidade("ALTA", cores)      → cores.erro (vermelho)
+//   nomeDoAlerta("RAJADA")             → "rajadas de vento"
+//   iconeDaDica("GUARDA_CHUVA")        → "umbrella"
+// ============================================================================
 import { Ionicons } from "@expo/vector-icons";
 import { Cores } from "../theme/cores";
 import { CategoriaClima, GravidadeAlerta, TipoAlerta, TipoDica } from "../models/Previsao";
@@ -49,6 +63,27 @@ export function iconeDoAlerta(tipo: TipoAlerta | null | undefined): NomeIcone {
             return "sunny";
         default:
             return "warning";
+    }
+}
+
+// nome de cada tipo de alerta, para o "Novo alerta: ..." do "O que mudou"
+// (os cards de alerta não precisam: o título deles já vem pronto da API)
+export function nomeDoAlerta(tipo: TipoAlerta | null | undefined): string {
+    switch (tipo) {
+        case "CHUVA":
+            return "chuva";
+        case "TEMPESTADE":
+            return "tempestade";
+        case "CALOR":
+            return "calor";
+        case "FRIO":
+            return "frio";
+        case "RAJADA":
+            return "rajadas de vento";
+        case "UV":
+            return "índice UV alto";
+        default:
+            return "clima";
     }
 }
 

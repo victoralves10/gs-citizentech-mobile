@@ -1,14 +1,23 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import TelaBase from "../components/TelaBase";
 import CabecalhoTela from "../components/CabecalhoTela";
 import TituloSecao from "../components/TituloSecao";
-import BlocoVazio from "../components/BlocoVazio";
 import Botao from "../components/Botao";
 import Selo from "../components/Selo";
-import { useTema } from "../theme/TemaContext";
+import Cartao from "../components/Cartao";
+import ItemLista from "../components/ItemLista";
+import CartaoClimaAgora from "../components/CartaoClimaAgora";
+import Indicadores from "../components/Indicadores";
+import ListaHoras from "../components/ListaHoras";
+import CartaoAlerta from "../components/CartaoAlerta";
+import CartaoMudanca from "../components/CartaoMudanca";
+import ChipsDicas from "../components/ChipsDicas";
+import { useHome } from "../hooks/useHome";
 import { useAuth } from "../context/AuthContext";
+import { dataCurta, dataLonga, diaDeHoje } from "../utils/formatar";
+import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
 // "Bom dia" até 11h59, "Boa tarde" até 17h59, depois "Boa noite"
@@ -24,17 +33,150 @@ export default function Home() {
     const estilos = criarEstilos(cores);
     const navigation = useNavigation();
     const { usuario } = useAuth();
+    const { dados, carregando, atualizando, erro, atualizar } = useHome();
 
     // só o primeiro nome: "Victor Alves" → "Victor"
     const primeiroNome = usuario?.nome.split(" ")[0] ?? "";
 
+    // ---------- um "convite" (caixa com ícone, texto e botão) ----------
+    function convite(
+        icone: keyof typeof Ionicons.glyphMap,
+        titulo: string,
+        texto: string,
+        botao?: { texto: string; onPress: () => void }
+    ) {
+        return (
+            <Cartao>
+                <View style={estilos.convite}>
+                    <Ionicons name={icone} size={40} color={cores.primaria} />
+                    <Text style={estilos.tituloConvite}>{titulo}</Text>
+                    <Text style={estilos.textoConvite}>{texto}</Text>
+                    {botao && <Botao texto={botao.texto} onPress={botao.onPress} />}
+                </View>
+            </Cartao>
+        );
+    }
+
+    // ---------- a parte do clima (depende da situação) ----------
+    function parteDoClima() {
+        if (carregando) {
+            return (
+                <ActivityIndicator size="large" color={cores.primaria} style={estilos.rodinha} />
+            );
+        }
+        if (erro && !dados) {
+            return convite("cloud-offline-outline", "Não deu para carregar", erro, {
+                texto: "Tentar de novo",
+                onPress: atualizar,
+            });
+        }
+        if (!dados) return null;
+
+        // 1) nenhum local salvo
+        if (!dados.temLocais) {
+            return convite(
+                "location-outline",
+                "Cadastre seu primeiro local",
+                "Salve sua casa, o trabalho ou a escola para ver o clima e os alertas aqui.",
+                { texto: "Adicionar local", onPress: () => navigation.navigate("NovoLocal") }
+            );
+        }
+
+        // 2) tem locais, mas nenhum é o principal
+        if (!dados.local) {
+            return convite(
+                "star-outline",
+                "Escolha o seu local principal",
+                'Em Meus Locais, toque num local e escolha "Tornar principal". Ele aparece aqui.',
+                { texto: "Ir para Meus Locais", onPress: () => navigation.navigate("MeusLocais") }
+            );
+        }
+
+        // 3) a previsão do local ainda está chegando (local acabou de ser criado)
+        if (!dados.climaAtual) {
+            return convite(
+                "hourglass-outline",
+                `Buscando a previsão de ${dados.local.apelido}`,
+                "Leva alguns segundos. Puxe a tela para baixo para atualizar."
+            );
+        }
+
+        // 4) tudo certo: o clima completo
+        const local = dados.local;
+        return (
+            <>
+                <View style={estilos.blocoClima}>
+                    <CartaoClimaAgora
+                        local={local}
+                        clima={dados.climaAtual}
+                        atualizadoEm={dados.atualizadoEm}
+                    />
+                    <Botao
+                        texto="Ver mais detalhes"
+                        icone="arrow-forward"
+                        variante="contorno"
+                        onPress={() =>
+                            navigation.navigate("DetalhesLocal", {
+                                localId: local.id,
+                                apelido: local.apelido,
+                            })
+                        }
+                    />
+                    <Indicadores clima={dados.climaAtual} />
+                </View>
+
+                {/* ---------- alertas de hoje ---------- */}
+                <TituloSecao
+                    titulo="Alertas de hoje"
+                    selo={
+                        dados.alertas.length > 0 ? (
+                            <Selo texto={String(dados.alertas.length)} cor="erro" />
+                        ) : undefined
+                    }
+                />
+                {dados.alertas.length > 0 ? (
+                    <View style={estilos.lista}>
+                        {dados.alertas.map((alerta, indice) => (
+                            <CartaoAlerta key={alerta.id ?? indice} alerta={alerta} />
+                        ))}
+                    </View>
+                ) : (
+                    <Cartao>
+                        <View style={estilos.semAlerta}>
+                            <Ionicons name="checkmark-circle" size={22} color={cores.sucesso} />
+                            <Text style={estilos.textoSemAlerta}>
+                                Nenhum alerta para hoje em {local.apelido}.
+                            </Text>
+                        </View>
+                    </Cartao>
+                )}
+
+                {/* ---------- dicas ---------- */}
+                {dados.dicas.length > 0 && (
+                    <>
+                        <TituloSecao titulo="Dicas para hoje" />
+                        <ChipsDicas dicas={dados.dicas} />
+                    </>
+                )}
+
+                {/* ---------- próximas horas ---------- */}
+                {dados.previsaoPorHora.length > 0 && (
+                    <>
+                        <TituloSecao titulo="Próximas horas" />
+                        <ListaHoras horas={dados.previsaoPorHora} />
+                    </>
+                )}
+            </>
+        );
+    }
+
     return (
-        <TelaBase>
+        <TelaBase aoAtualizar={atualizar} atualizando={atualizando}>
             <View>
                 <CabecalhoTela
                     acima={`${saudacao()}, ${primeiroNome}`}
-                    titulo="Seu local principal"
-                    subtitulo="Cadastre um local para ver o clima aqui"
+                    titulo="Hoje"
+                    subtitulo={dataLonga(diaDeHoje())}
                     direita={
                         // sino: atalho para a aba Alertas
                         <Pressable
@@ -47,44 +189,40 @@ export default function Home() {
                     }
                 />
 
-                {/* clima agora + botão para os detalhes */}
-                <View style={estilos.blocoComBotao}>
-                    <BlocoVazio titulo="Clima agora" icone="partly-sunny-outline" altura={170} />
-                    <Botao
-                        texto="Ver mais detalhes"
-                        icone="arrow-forward"
-                        variante="contorno"
-                        onPress={() => navigation.navigate("DetalhesLocal")}
-                    />
-                </View>
+                <View style={estilos.clima}>{parteDoClima()}</View>
 
-                <TituloSecao
-                    titulo="Explicação do dia"
-                    selo={<Selo texto="IA" cor="secundaria" />}
-                />
-                <BlocoVazio titulo="Texto da IA sobre o dia" icone="sparkles-outline" />
+                {/* ---------- o que mudou (de TODOS os locais) ---------- */}
+                {dados && dados.mudancasNaPrevisao.length > 0 && (
+                    <>
+                        <TituloSecao titulo="O que mudou na previsão" />
+                        <View style={estilos.lista}>
+                            {dados.mudancasNaPrevisao.map((mudanca) => (
+                                <CartaoMudanca
+                                    key={`${mudanca.id}-${mudanca.localId}`}
+                                    mudanca={mudanca}
+                                />
+                            ))}
+                        </View>
+                    </>
+                )}
 
-                <TituloSecao titulo="Alertas de hoje" />
-                <BlocoVazio titulo="Alertas do local principal" icone="warning-outline" />
-
-                <TituloSecao titulo="Dicas para hoje" />
-                <BlocoVazio titulo="Guarda-chuva, protetor, casaco..." icone="umbrella-outline" />
-
-                <TituloSecao titulo="Hoje, hora a hora" />
-                <BlocoVazio
-                    titulo="Gráfico de temperatura e chuva"
-                    icone="stats-chart-outline"
-                    altura={170}
-                />
-
-                <TituloSecao titulo="A previsão mudou" />
-                <BlocoVazio
-                    titulo="Mudanças bruscas nos seus locais"
-                    icone="trending-down-outline"
-                />
-
-                <TituloSecao titulo="Seus próximos eventos" />
-                <BlocoVazio titulo="Eventos e o clima de cada um" icone="calendar-outline" />
+                {/* ---------- próximos compromissos ---------- */}
+                {dados && dados.compromissos.length > 0 && (
+                    <>
+                        <TituloSecao titulo="Próximos compromissos" />
+                        <Cartao semEspaco>
+                            {dados.compromissos.map((compromisso, indice) => (
+                                <ItemLista
+                                    key={compromisso.id}
+                                    titulo={compromisso.nome}
+                                    descricao={`${dataCurta(compromisso.data)} · ${compromisso.localApelido}`}
+                                    icone="calendar-outline"
+                                    divisor={indice > 0}
+                                />
+                            ))}
+                        </Cartao>
+                    </>
+                )}
             </View>
         </TelaBase>
     );
@@ -102,9 +240,45 @@ function criarEstilos(cores: Cores) {
             borderWidth: 1,
             borderColor: cores.borda,
         },
-        blocoComBotao: {
-            marginTop: 8,
+        clima: {
+            marginTop: 16,
+        },
+        rodinha: {
+            marginTop: 48,
+        },
+        blocoClima: {
             gap: 12,
+        },
+        lista: {
+            gap: 10,
+        },
+        convite: {
+            alignItems: "center",
+            gap: 10,
+            paddingVertical: 8,
+        },
+        tituloConvite: {
+            fontSize: 18,
+            fontWeight: "800",
+            textAlign: "center",
+            color: cores.texto,
+        },
+        textoConvite: {
+            fontSize: 14,
+            lineHeight: 20,
+            textAlign: "center",
+            color: cores.textoSecundario,
+            marginBottom: 6,
+        },
+        semAlerta: {
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 10,
+        },
+        textoSemAlerta: {
+            flex: 1,
+            fontSize: 14,
+            color: cores.textoSecundario,
         },
     });
 }

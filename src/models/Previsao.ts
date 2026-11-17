@@ -1,5 +1,9 @@
 import { Compromisso } from "./Compromisso";
 
+// ---------------------------------------------------------------------------
+// TIPOS FIXOS (a API manda sempre um destes textos)
+// ---------------------------------------------------------------------------
+
 // como está o céu (o app usa para escolher o ícone)
 export type CategoriaClima =
     | "CEU_LIMPO"
@@ -24,6 +28,10 @@ export type TipoDica =
 
 // o que fez a previsão mudar ("O que mudou")
 export type MotivoMudanca = "ALERTA" | "CEU" | "CHUVA" | "TEMPERATURA";
+
+// ---------------------------------------------------------------------------
+// PEDAÇOS DA PREVISÃO
+// ---------------------------------------------------------------------------
 
 // o local da previsão (resumido)
 export type LocalResumo = {
@@ -113,6 +121,10 @@ export type Mudanca = {
     gravidadeAlerta: GravidadeAlerta | null;
 };
 
+// ---------------------------------------------------------------------------
+// RESPOSTAS DAS TELAS
+// ---------------------------------------------------------------------------
+
 // GET /home
 export type RespostaHome = {
     temLocais: boolean; // false: convida a cadastrar o 1º local
@@ -120,7 +132,6 @@ export type RespostaHome = {
     atualizadoEm: string | null;
     climaAtual: ClimaAtual | null;
     previsaoPorHora: PrevisaoHora[];
-    explicacaoDoDia: string | null; // texto da IA (null: o card some)
     alertas: Alerta[];
     dicas: Dica[];
     mudancasNaPrevisao: Mudanca[];
@@ -144,6 +155,5 @@ export type RespostaPesquisa = {
     climaAtual: ClimaAtual | null;
     previsaoPorHora: PrevisaoHora[];
     previsaoDiaria: PrevisaoDia[];
-    explicacaoDoDia: string | null;
     alertas: Alerta[];
 };

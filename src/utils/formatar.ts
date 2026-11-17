@@ -63,6 +63,14 @@ function diaDaSemana(texto: string): number {
     return new Date(ano, mes - 1, dia).getDay();
 }
 
+// a data de hoje no formato da API: "2026-11-17"
+export function diaDeHoje(): string {
+    const agora = new Date();
+    const mes = String(agora.getMonth() + 1).padStart(2, "0");
+    const dia = String(agora.getDate()).padStart(2, "0");
+    return `${agora.getFullYear()}-${mes}-${dia}`;
+}
+
 // "2026-11-17T14:00" → "14h"
 export function hora(texto: string | null | undefined): string {
     if (!texto) return VAZIO;

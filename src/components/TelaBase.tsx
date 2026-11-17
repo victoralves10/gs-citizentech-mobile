@@ -1,5 +1,12 @@
 import { ReactNode } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
+import {
+    KeyboardAvoidingView,
+    Platform,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTema } from "../theme/TemaContext";
 
@@ -8,6 +15,8 @@ type Props = {
     rolar?: boolean;
     comCabecalho?: boolean;
     semEspaco?: boolean; // tira o espaço das bordas (só quando rolar = false)
+    aoAtualizar?: () => void; // com isso, puxar a tela para baixo atualiza
+    atualizando?: boolean; // mostra a rodinha do "puxar para atualizar"
 };
 
 export default function TelaBase({
@@ -15,6 +24,8 @@ export default function TelaBase({
     rolar = true,
     comCabecalho = false,
     semEspaco = false,
+    aoAtualizar,
+    atualizando = false,
 }: Props) {
     const { cores } = useTema();
 
@@ -36,6 +47,17 @@ export default function TelaBase({
                         contentContainerStyle={estilos.conteudo}
                         // deixa tocar nos botões mesmo com o teclado aberto
                         keyboardShouldPersistTaps="handled"
+                        // "puxar para atualizar" (só quando a tela passou o aoAtualizar)
+                        refreshControl={
+                            aoAtualizar ? (
+                                <RefreshControl
+                                    refreshing={atualizando}
+                                    onRefresh={aoAtualizar}
+                                    colors={[cores.primaria]}
+                                    tintColor={cores.primaria}
+                                />
+                            ) : undefined
+                        }
                     >
                         {children}
                     </ScrollView>

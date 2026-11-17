@@ -15,7 +15,7 @@ export type ListaDeTelas = {
     Perfil: undefined;
 
     // telas que abrem por cima das abas (com login)
-    DetalhesLocal: undefined;
+    DetalhesLocal: { localId: number; apelido?: string }; // apelido = título da tela
     SobreApp: undefined;
     NovoLocal: { lugar?: Lugar } | undefined;
 };

@@ -9,16 +9,17 @@ import { Cores, transparente } from "../theme/cores";
 
 type Props = {
     local: LocalCard;
+    onAbrir: () => void; // tocou no cartão
     onAlertas: (ligar: boolean) => void; // tocou no interruptor (true = ligou)
-    onOpcoes: () => void; // tocou no cartão ou nos "⋮"
+    onOpcoes: () => void; // tocou nos "⋮"
 };
 
-export default function CartaoLocal({ local, onAlertas, onOpcoes }: Props) {
+export default function CartaoLocal({ local, onAbrir, onAlertas, onOpcoes }: Props) {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
 
     return (
-        <Cartao semEspaco onPress={onOpcoes}>
+        <Cartao semEspaco onPress={onAbrir}>
             {/* ---------- parte de cima: ícone, nomes e ⋮ ---------- */}
             <View style={estilos.topo}>
                 {/* o principal ganha a casinha; os outros, o alfinete */}

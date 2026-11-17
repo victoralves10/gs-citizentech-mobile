@@ -172,6 +172,12 @@ export default function MeusLocais() {
                 renderItem={({ item }) => (
                     <CartaoLocal
                         local={item}
+                        onAbrir={() =>
+                            navigation.navigate("DetalhesLocal", {
+                                localId: item.id,
+                                apelido: item.apelido,
+                            })
+                        }
                         onAlertas={(ligar) => lista.alternarAlertas(item, ligar)}
                         onOpcoes={() => abrirMenu(item)}
                     />

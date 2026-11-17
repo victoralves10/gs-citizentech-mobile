@@ -110,7 +110,10 @@ export default function Rotas() {
                         <Pilha.Screen
                             name="DetalhesLocal"
                             component={DetalhesLocal}
-                            options={{ title: "Detalhes do local" }}
+                            // o título é o apelido do local ("Casa"), que vem junto ao abrir
+                            options={({ route }) => ({
+                                title: route.params?.apelido ?? "Detalhes do local",
+                            })}
                         />
                         <Pilha.Screen
                             name="SobreApp"
