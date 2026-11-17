@@ -7,9 +7,15 @@ type Props = {
     children: ReactNode;
     rolar?: boolean;
     comCabecalho?: boolean;
+    semEspaco?: boolean; // tira o espaço das bordas (só quando rolar = false)
 };
 
-export default function TelaBase({ children, rolar = true, comCabecalho = false }: Props) {
+export default function TelaBase({
+    children,
+    rolar = true,
+    comCabecalho = false,
+    semEspaco = false,
+}: Props) {
     const { cores } = useTema();
 
     return (
@@ -34,7 +40,7 @@ export default function TelaBase({ children, rolar = true, comCabecalho = false 
                         {children}
                     </ScrollView>
                 ) : (
-                    <View style={[estilos.tela, estilos.conteudo]}>{children}</View>
+                    <View style={[estilos.tela, !semEspaco && estilos.conteudo]}>{children}</View>
                 )}
             </KeyboardAvoidingView>
         </SafeAreaView>
