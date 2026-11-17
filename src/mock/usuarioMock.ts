@@ -1,3 +1,4 @@
+// Perfil falso (mock): finge ser o /usuarios/me usando o usuário da sessão salva.
 import { Usuario } from "../models/Usuario";
 import { buscarSessao } from "../storage/sessaoStorage";
 import { copia, esperar } from "./utils";
@@ -24,15 +25,6 @@ async function alterarNome(nome: string): Promise<Usuario> {
     return { ...(await usuarioAtual()), nome: nome.trim() };
 }
 
-async function alterarSobreMim(perfilIa: string): Promise<Usuario> {
-    await esperar();
-    if (perfilIa.length > 200) {
-        throw new Error('O "Sobre mim" deve ter no máximo 200 caracteres');
-    }
-    // igual à API: texto vazio vira null
-    return { ...(await usuarioAtual()), perfilIa: perfilIa.trim() || null };
-}
-
 async function alterarSenha(senhaAtual: string, novaSenha: string): Promise<void> {
     await esperar();
     if (novaSenha === senhaAtual) {
@@ -44,4 +36,4 @@ async function excluirConta(): Promise<void> {
     await esperar();
 }
 
-export const usuarioMock = { buscar, alterarNome, alterarSobreMim, alterarSenha, excluirConta };
+export const usuarioMock = { buscar, alterarNome, alterarSenha, excluirConta };

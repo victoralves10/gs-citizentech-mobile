@@ -1,9 +1,10 @@
+// Formato dos dados do usuário, iguais ao que a API Java devolve.
+
 // um usuário do app (GET /usuarios/me)
 export type Usuario = {
     id: number;
     nome: string;
     email: string;
-    perfilIa?: string | null; // o "Sobre mim" (null quando está vazio)
 };
 
 // o que o app guarda no celular depois do login/cadastro

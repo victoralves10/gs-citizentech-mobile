@@ -20,15 +20,7 @@ const EQUIPE = [
 ];
 
 // tecnologias usadas no projeto (aparecem como selos)
-const TECNOLOGIAS = [
-    "React Native",
-    "Expo",
-    "TypeScript",
-    "Java Spring",
-    "Spring AI",
-    "Oracle",
-    "Open-Meteo",
-];
+const TECNOLOGIAS = ["React Native", "Expo", "TypeScript", "Java Spring", "Oracle", "Open-Meteo"];
 
 export default function SobreApp() {
     const { cores } = useTema();
@@ -63,8 +55,8 @@ export default function SobreApp() {
                 <TituloSecao titulo="O que é" />
                 <Cartao>
                     <Text style={estilos.paragrafo}>
-                        O GaroAvisa mostra o clima dos lugares que importam para você, explica a
-                        previsão em português simples e avisa quando o tempo pede atenção.
+                        O GaroAvisa mostra o clima dos lugares que importam para você, hora a hora e
+                        para os próximos dias, e avisa quando o tempo pede atenção.
                     </Text>
                 </Cartao>
 

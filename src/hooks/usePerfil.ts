@@ -1,3 +1,5 @@
+// Toda a lógica da tela Perfil: busca os dados, edita nome e senha e exclui a conta.
+// Só uma janela fica aberta por vez ("nome", "senha" ou null).
 import { useCallback, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
@@ -5,10 +7,7 @@ import { usuarioService } from "../services/usuario/usuarioService";
 import { mensagemDeErro } from "../services/api";
 import { toastErro, toastSucesso } from "../utils/toast";
 
-type Janela = "nome" | "sobreMim" | "senha" | null;
-
-// tamanho máximo do "Sobre mim" (igual à API)
-export const TAMANHO_SOBRE_MIM = 200;
+type Janela = "nome" | "senha" | null;
 
 export function usePerfil() {
     const { usuario, atualizarUsuario, sair } = useAuth();
@@ -18,7 +17,6 @@ export function usePerfil() {
 
     // os campos das janelas
     const [nome, setNome] = useState("");
-    const [sobreMim, setSobreMim] = useState("");
     const [senhaAtual, setSenhaAtual] = useState("");
     const [novaSenha, setNovaSenha] = useState("");
     const [confirmacao, setConfirmacao] = useState("");
@@ -48,11 +46,6 @@ export function usePerfil() {
         abrir("nome");
     }
 
-    function abrirSobreMim() {
-        setSobreMim(usuario?.perfilIa ?? "");
-        abrir("sobreMim");
-    }
-
     function abrirSenha() {
         setSenhaAtual("");
         setNovaSenha("");
@@ -69,7 +62,7 @@ export function usePerfil() {
         setJanela(null);
     }
 
-    // ---------- salvar (a mesma função serve para as 3 janelas) ----------
+    // ---------- salvar (a mesma função serve para as 2 janelas) ----------
     async function salvar() {
         // conferência rápida antes de chamar a API (o resto a API confere)
         if (janela === "nome" && !nome.trim()) {
@@ -90,9 +83,6 @@ export function usePerfil() {
             if (janela === "nome") {
                 await atualizarUsuario(await usuarioService.alterarNome(nome.trim()));
                 toastSucesso("Nome atualizado!");
-            } else if (janela === "sobreMim") {
-                await atualizarUsuario(await usuarioService.alterarSobreMim(sobreMim.trim()));
-                toastSucesso('"Sobre mim" atualizado!');
             } else if (janela === "senha") {
                 await usuarioService.alterarSenha(senhaAtual, novaSenha);
                 toastSucesso("Senha trocada!");
@@ -128,8 +118,6 @@ export function usePerfil() {
         campos: {
             nome,
             setNome,
-            sobreMim,
-            setSobreMim,
             senhaAtual,
             setSenhaAtual,
             novaSenha,
@@ -138,7 +126,6 @@ export function usePerfil() {
             setConfirmacao,
         },
         abrirNome,
-        abrirSobreMim,
         abrirSenha,
         fechar,
         salvar,

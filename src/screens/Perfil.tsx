@@ -1,3 +1,5 @@
+// Tela de Perfil: nome, senha, aparência, Sobre o App, sair e excluir conta.
+// Toda a lógica está no hook usePerfil. Notificações são só visuais ("Em breve").
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -15,7 +17,7 @@ import CampoTexto from "../components/CampoTexto";
 import { NOME_DO_APP } from "../components/Marca";
 import { useTema } from "../theme/TemaContext";
 import { useAuth } from "../context/AuthContext";
-import { TAMANHO_SOBRE_MIM, usePerfil } from "../hooks/usePerfil";
+import { usePerfil } from "../hooks/usePerfil";
 import { Cores } from "../theme/cores";
 
 // os tipos de notificação que o app vai ter (por enquanto só os títulos)
@@ -106,25 +108,6 @@ export default function Perfil() {
                         <Ionicons name="create-outline" size={22} color={cores.textoSobreCor} />
                     </LinearGradient>
                 </Pressable>
-
-                {/* ---------- SOBRE MIM ---------- */}
-                <TituloSecao
-                    titulo="Sobre mim"
-                    selo={<Selo texto="usado pela IA" cor="secundaria" />}
-                />
-                <Cartao onPress={perfil.abrirSobreMim}>
-                    <View style={estilos.linhaSobreMim}>
-                        {/* com texto: mostra o texto. Vazio: mostra o convite */}
-                        {usuario?.perfilIa ? (
-                            <Text style={estilos.textoSobreMim}>{usuario.perfilIa}</Text>
-                        ) : (
-                            <Text style={estilos.textoVazio}>
-                                Conte algo sobre você para receber dicas personalizadas.
-                            </Text>
-                        )}
-                        <Ionicons name="create-outline" size={20} color={cores.textoSuave} />
-                    </View>
-                </Cartao>
 
                 {/* ---------- NOTIFICAÇÕES (só visual) ---------- */}
                 <TituloSecao
@@ -217,32 +200,6 @@ export default function Perfil() {
                     maxLength={100}
                     autoFocus
                 />
-            </JanelaEdicao>
-
-            <JanelaEdicao
-                visivel={perfil.janela === "sobreMim"}
-                titulo="Sobre mim"
-                erro={perfil.erro}
-                salvando={perfil.salvando}
-                onFechar={perfil.fechar}
-                onSalvar={perfil.salvar}
-            >
-                <Text style={estilos.ajuda}>
-                    A IA usa este texto para explicar o clima do jeito que importa para você. Ex.:
-                    &quot;Vou de bicicleta para o trabalho e tenho rinite.&quot;
-                </Text>
-                <CampoTexto
-                    rotulo="Sobre mim"
-                    alto
-                    value={campos.sobreMim}
-                    onChangeText={campos.setSobreMim}
-                    maxLength={TAMANHO_SOBRE_MIM}
-                    placeholder="Conte um pouco da sua rotina"
-                />
-                {/* contador: 35/200 */}
-                <Text style={estilos.contador}>
-                    {campos.sobreMim.length}/{TAMANHO_SOBRE_MIM}
-                </Text>
             </JanelaEdicao>
 
             <JanelaEdicao
@@ -352,37 +309,6 @@ function criarEstilos(cores: Cores) {
             fontSize: 11,
             fontWeight: "700",
             color: cores.textoSobreCor,
-        },
-
-        // sobre mim
-        linhaSobreMim: {
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 12,
-        },
-        textoVazio: {
-            flex: 1,
-            fontSize: 14,
-            color: cores.textoSuave,
-        },
-        textoSobreMim: {
-            flex: 1,
-            fontSize: 14,
-            lineHeight: 20,
-            color: cores.texto,
-        },
-
-        // janelas de edição
-        ajuda: {
-            fontSize: 14,
-            lineHeight: 20,
-            color: cores.textoSecundario,
-        },
-        contador: {
-            alignSelf: "flex-end",
-            marginTop: -8,
-            fontSize: 12,
-            color: cores.textoSuave,
         },
 
         // rodapé
