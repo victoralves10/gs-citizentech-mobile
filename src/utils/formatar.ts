@@ -17,6 +17,10 @@ const MESES = [
     "dezembro",
 ];
 
+// ---------------------------------------------------------------------------
+// NÚMEROS
+// ---------------------------------------------------------------------------
+
 // 24.3 → "24°"   (-0.4 vira "0°", e não "-0°")
 export function temperatura(valor: number | null | undefined): string {
     if (valor == null) return VAZIO;
@@ -41,6 +45,16 @@ export function milimetros(valor: number | null | undefined): string {
     if (valor == null) return VAZIO;
     return `${valor.toFixed(1).replace(".", ",")} mm`;
 }
+
+// ---------------------------------------------------------------------------
+// DATAS
+// A API manda dois tipos de data:
+//   - data e hora do LOCAL, sem fuso: "2026-11-17T14:00" ou só "2026-11-17"
+//     → a gente lê os pedaços do texto, sem converter fuso (senão o dia
+//       ou a hora podem "pular" para o errado)
+//   - um instante, com o "Z" no fim: "2026-11-17T13:00:00Z"
+//     → esse pode virar Date normalmente (usado só no tempoAtras)
+// ---------------------------------------------------------------------------
 
 // "2026-11-18" (ou "2026-11-18T14:00") → { ano: 2026, mes: 11, dia: 18 }
 function lerDia(texto: string) {
@@ -123,4 +137,19 @@ export function tempoAtras(texto: string | null | undefined): string {
 
     const dias = Math.floor(horas / 24);
     return dias === 1 ? "há 1 dia" : `há ${dias} dias`;
+}
+
+// ---------------------------------------------------------------------------
+// LUGAR (resultado da busca de lugares)
+// ---------------------------------------------------------------------------
+
+// "São Paulo, São Paulo · Brasil" (sem repetir a cidade quando ela é o próprio lugar)
+export function descricaoDoLugar(lugar: {
+    nome: string;
+    cidade: string;
+    estado: string;
+    pais: string;
+}): string {
+    const cidade = lugar.cidade && lugar.cidade !== lugar.nome ? `${lugar.cidade}, ` : "";
+    return `${cidade}${lugar.estado} · ${lugar.pais}`;
 }

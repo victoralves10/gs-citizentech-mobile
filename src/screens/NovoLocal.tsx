@@ -11,18 +11,12 @@ import Botao from "../components/Botao";
 import TituloSecao from "../components/TituloSecao";
 import { useNovoLocal } from "../hooks/useNovoLocal";
 import { ListaDeTelas } from "../navigation/tipos";
-import { Lugar } from "../models/Lugar";
+import { descricaoDoLugar } from "../utils/formatar";
 import { useTema } from "../theme/TemaContext";
 import { Cores, transparente } from "../theme/cores";
 
 // apelidos prontos para tocar e preencher
 const SUGESTOES = ["Casa", "Trabalho", "Escola", "Academia"];
-
-// "São Paulo, São Paulo · Brasil" (sem repetir quando a cidade é o próprio lugar)
-function descricaoDoLugar(lugar: Lugar) {
-    const cidade = lugar.cidade && lugar.cidade !== lugar.nome ? `${lugar.cidade}, ` : "";
-    return `${cidade}${lugar.estado} · ${lugar.pais}`;
-}
 
 export default function NovoLocal() {
     const { cores } = useTema();
@@ -33,7 +27,7 @@ export default function NovoLocal() {
     const rota = useRoute<RouteProp<ListaDeTelas, "NovoLocal">>();
     const novo = useNovoLocal(rota.params?.lugar);
 
-    // salvou: volta para Meus Locais (que atualiza a lista sozinha)
+    // salvou: volta para a tela anterior (Meus Locais atualiza a lista sozinha)
     async function salvar() {
         const deuCerto = await novo.salvar();
         if (deuCerto) {
