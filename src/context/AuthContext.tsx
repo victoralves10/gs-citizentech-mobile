@@ -1,8 +1,10 @@
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { Usuario } from "../models/Usuario";
 import { authService } from "../services/auth/authService";
+import { aoExpirarSessao } from "../services/api";
 import { apagarSessao, buscarSessao, salvarSessao } from "../storage/sessaoStorage";
 import { log } from "../utils/log";
+import { toastAviso } from "../utils/toast";
 
 type AuthContextDados = {
     usuario: Usuario | null;
@@ -32,12 +34,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
     }, []);
 
-    // login: chama o authService, salva a sessão no celular e entra no app.
-    // Se der erro (ex.: senha errada), o erro "sobe" para a tela mostrar o toast.
+    const jaAvisou = useRef(false);
+
+    useEffect(() => {
+        aoExpirarSessao(async () => {
+            if (jaAvisou.current) return;
+            jaAvisou.current = true;
+
+            await apagarSessao();
+            setUsuario(null);
+            toastAviso("Sua sessão expirou. Entre de novo.");
+            log.sessao("sessão expirada (401)");
+        });
+    }, []);
+
     async function entrar(email: string, senha: string) {
         const sessao = await authService.entrar(email, senha);
         await salvarSessao(sessao);
         setUsuario(sessao.usuario);
+        jaAvisou.current = false;
         log.sessao(`login feito (${sessao.usuario.email})`);
     }
 
@@ -46,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const sessao = await authService.cadastrar(nome, email, senha);
         await salvarSessao(sessao);
         setUsuario(sessao.usuario);
+        jaAvisou.current = false;
         log.sessao(`cadastro feito (${sessao.usuario.email})`);
     }
 

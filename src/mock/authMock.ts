@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { RespostaSessao, Usuario } from "../../models/Usuario";
+import { RespostaSessao, Usuario } from "../models/Usuario";
 
 // formato de um usuário guardado no "banco falso" (com a senha)
 type UsuarioMock = Usuario & { senha: string };

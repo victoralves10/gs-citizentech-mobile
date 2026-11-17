@@ -1,6 +1,5 @@
-import { authMock } from "./authMock";
+import { USAR_MOCK } from "../../config/mock";
+import { authMock } from "../../mock/authMock";
 import { authApi } from "./authApi";
 
-export const USAR_MOCK = true;
-
-export const authService = USAR_MOCK ? authMock : authApi;
+export const authService = USAR_MOCK.auth ? authMock : authApi;

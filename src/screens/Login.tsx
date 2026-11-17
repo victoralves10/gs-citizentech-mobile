@@ -7,7 +7,7 @@ import Selo from "../components/Selo";
 import TextoComLink from "../components/TextoComLink";
 import { useTema } from "../theme/TemaContext";
 import { useLogin } from "../hooks/useLogin";
-import { USAR_MOCK } from "../services/auth/authService";
+import { USAR_MOCK } from "../config/mock";
 import { toastAviso } from "../utils/toast";
 import { Cores } from "../theme/cores";
 
@@ -20,7 +20,7 @@ export default function Login() {
     const { email, setEmail, senha, setSenha, erros, carregando, enviar } = useLogin();
 
     // selo do usuário de teste: só aparece enquanto o login é falso (mock)
-    const rodape = USAR_MOCK ? (
+    const rodape = USAR_MOCK.auth ? (
         <Selo
             texto="Modo teste: teste@gs.com / 123456"
             cor="neutro"
