@@ -1,3 +1,5 @@
+import { Lugar } from "../models/Lugar";
+
 export type ListaDeTelas = {
     // telas de fora (sem login)
     Apresentacao: undefined; // boas-vindas da primeira abertura
@@ -15,6 +17,7 @@ export type ListaDeTelas = {
     // telas que abrem por cima das abas (com login)
     DetalhesLocal: undefined;
     SobreApp: undefined;
+    NovoLocal: { lugar?: Lugar } | undefined;
 };
 
 declare global {

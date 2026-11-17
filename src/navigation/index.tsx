@@ -19,6 +19,7 @@ import Alertas from "../screens/Alertas";
 import DetalhesLocal from "../screens/DetalhesLocal";
 import Perfil from "../screens/Perfil";
 import SobreApp from "../screens/SobreApp";
+import NovoLocal from "../screens/NovoLocal";
 
 // cria os 2 navegadores (os dois conhecem a nossa lista de telas)
 const Pilha = createNativeStackNavigator<ListaDeTelas>();
@@ -115,6 +116,11 @@ export default function Rotas() {
                             name="SobreApp"
                             component={SobreApp}
                             options={{ title: "Sobre o App" }}
+                        />
+                        <Pilha.Screen
+                            name="NovoLocal"
+                            component={NovoLocal}
+                            options={{ title: "Novo local" }}
                         />
                         <Pilha.Screen
                             name="Apresentacao"

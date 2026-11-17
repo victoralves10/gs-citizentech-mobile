@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import {
     ActivityIndicator,
     Alert,
@@ -23,7 +24,6 @@ import { LocalCard } from "../models/Local";
 import { mensagemDeErro } from "../services/api";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
-import { toastAviso } from "../utils/toast";
 
 // "1 local salvo" / "3 locais salvos" / "Nenhum local salvo ainda"
 function textoQuantidade(total: number, buscando: boolean) {
@@ -37,6 +37,7 @@ function textoQuantidade(total: number, buscando: boolean) {
 export default function MeusLocais() {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
+    const navigation = useNavigation();
 
     // tudo da lista vem do hook
     const lista = useMeusLocais();
@@ -108,7 +109,7 @@ export default function MeusLocais() {
                     <BotaoPilula
                         texto="Novo local"
                         icone="add"
-                        onPress={() => toastAviso("Cadastro de locais na próxima feature.")}
+                        onPress={() => navigation.navigate("NovoLocal")}
                     />
                 }
             />
@@ -154,6 +155,11 @@ export default function MeusLocais() {
                 <Text style={estilos.textoVazio}>
                     Salve sua casa, o trabalho ou a escola para ver o clima e receber alertas.
                 </Text>
+                <Botao
+                    texto="Adicionar meu primeiro local"
+                    icone="add"
+                    onPress={() => navigation.navigate("NovoLocal")}
+                />
             </View>
         );
     }
