@@ -218,6 +218,13 @@ export default function Home() {
                                     descricao={`${dataCurta(compromisso.data)} · ${compromisso.localApelido}`}
                                     icone="calendar-outline"
                                     divisor={indice > 0}
+                                    // abre os Detalhes do local do compromisso
+                                    onPress={() =>
+                                        navigation.navigate("DetalhesLocal", {
+                                            localId: compromisso.localId,
+                                            apelido: compromisso.localApelido,
+                                        })
+                                    }
                                 />
                             ))}
                         </Cartao>

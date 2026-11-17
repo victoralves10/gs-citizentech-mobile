@@ -5,7 +5,7 @@ import TelaBase from "../components/TelaBase";
 import TituloSecao from "../components/TituloSecao";
 import Cartao from "../components/Cartao";
 import Botao from "../components/Botao";
-import BlocoVazio from "../components/BlocoVazio";
+import SecaoCompromissos from "../components/SecaoCompromissos";
 import CartaoClimaAgora from "../components/CartaoClimaAgora";
 import Indicadores from "../components/Indicadores";
 import ListaHoras from "../components/ListaHoras";
@@ -143,9 +143,8 @@ export default function DetalhesLocal() {
                     </>
                 )}
 
-                {/* ---------- compromissos (chegam na feature 8) ---------- */}
-                <TituloSecao titulo="Compromissos deste local" />
-                <BlocoVazio titulo="Compromissos marcados neste local" icone="calendar-outline" />
+                {/* ---------- compromissos ---------- */}
+                <SecaoCompromissos localId={local.id} />
             </View>
         </TelaBase>
     );
