@@ -1,5 +1,4 @@
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
-import Interruptor from "../components/Interruptor";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -10,10 +9,13 @@ import TituloSecao from "../components/TituloSecao";
 import ItemLista from "../components/ItemLista";
 import Segmentado from "../components/Segmentado";
 import Selo from "../components/Selo";
+import Interruptor from "../components/Interruptor";
+import JanelaEdicao from "../components/JanelaEdicao";
+import CampoTexto from "../components/CampoTexto";
 import { NOME_DO_APP } from "../components/Marca";
 import { useTema } from "../theme/TemaContext";
 import { useAuth } from "../context/AuthContext";
-import { toastAviso } from "../utils/toast";
+import { TAMANHO_SOBRE_MIM, usePerfil } from "../hooks/usePerfil";
 import { Cores } from "../theme/cores";
 
 // os tipos de notificação que o app vai ter (por enquanto só os títulos)
@@ -39,7 +41,11 @@ export default function Perfil() {
     const { cores, preferencia, mudarPreferencia } = useTema();
     const estilos = criarEstilos(cores);
     const navigation = useNavigation();
-    const { usuario, sair } = useAuth();
+    const { sair } = useAuth();
+
+    // tudo que a tela precisa vem do hook
+    const perfil = usePerfil();
+    const { usuario, campos } = perfil;
 
     // pergunta antes de sair (Alert = a caixinha de confirmação do próprio celular)
     function confirmarSaida() {
@@ -49,9 +55,16 @@ export default function Perfil() {
         ]);
     }
 
-    // o que ainda não existe só mostra um aviso
-    function emBreve() {
-        toastAviso("Essa função chega em breve.");
+    // pergunta antes de excluir: não tem volta!
+    function confirmarExclusao() {
+        Alert.alert(
+            "Excluir minha conta",
+            "Seus locais e compromissos também serão apagados. Isso não pode ser desfeito.",
+            [
+                { text: "Cancelar", style: "cancel" },
+                { text: "Excluir", style: "destructive", onPress: perfil.excluirConta },
+            ]
+        );
     }
 
     return (
@@ -60,43 +73,55 @@ export default function Perfil() {
             <View>
                 <Text style={estilos.tituloTela}>Perfil</Text>
 
-                {/* ---------- CARTÃO DO USUÁRIO (degradê) ---------- */}
-                <LinearGradient
-                    colors={[cores.primaria, cores.primariaForte]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={estilos.cartaoUsuario}
-                >
-                    {/* enfeite: bolha de luz no canto */}
-                    <View style={estilos.bolha} />
+                {/* ---------- CARTÃO DO USUÁRIO (degradê): tocar edita o nome ---------- */}
+                <Pressable onPress={perfil.abrirNome}>
+                    <LinearGradient
+                        colors={[cores.primaria, cores.primariaForte]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={estilos.cartaoUsuario}
+                    >
+                        {/* enfeite: bolha de luz no canto */}
+                        <View style={estilos.bolha} />
 
-                    <View style={estilos.avatar}>
-                        <Text style={estilos.iniciais}>{iniciais(usuario?.nome)}</Text>
-                    </View>
-                    <View style={estilos.dados}>
-                        <Text style={estilos.nome} numberOfLines={1}>
-                            {usuario?.nome}
-                        </Text>
-                        <Text style={estilos.email} numberOfLines={1}>
-                            {usuario?.email}
-                        </Text>
-                        <View style={estilos.papel}>
-                            <Ionicons name="person-outline" size={12} color={cores.textoSobreCor} />
-                            <Text style={estilos.textoPapel}>Cidadão</Text>
+                        <View style={estilos.avatar}>
+                            <Text style={estilos.iniciais}>{iniciais(usuario?.nome)}</Text>
                         </View>
-                    </View>
-                </LinearGradient>
+                        <View style={estilos.dados}>
+                            <Text style={estilos.nome} numberOfLines={1}>
+                                {usuario?.nome}
+                            </Text>
+                            <Text style={estilos.email} numberOfLines={1}>
+                                {usuario?.email}
+                            </Text>
+                            <View style={estilos.papel}>
+                                <Ionicons
+                                    name="person-outline"
+                                    size={12}
+                                    color={cores.textoSobreCor}
+                                />
+                                <Text style={estilos.textoPapel}>Cidadão</Text>
+                            </View>
+                        </View>
+                        <Ionicons name="create-outline" size={22} color={cores.textoSobreCor} />
+                    </LinearGradient>
+                </Pressable>
 
                 {/* ---------- SOBRE MIM ---------- */}
                 <TituloSecao
                     titulo="Sobre mim"
                     selo={<Selo texto="usado pela IA" cor="secundaria" />}
                 />
-                <Cartao onPress={emBreve}>
+                <Cartao onPress={perfil.abrirSobreMim}>
                     <View style={estilos.linhaSobreMim}>
-                        <Text style={estilos.textoVazio}>
-                            Conte algo sobre você para receber dicas personalizadas.
-                        </Text>
+                        {/* com texto: mostra o texto. Vazio: mostra o convite */}
+                        {usuario?.perfilIa ? (
+                            <Text style={estilos.textoSobreMim}>{usuario.perfilIa}</Text>
+                        ) : (
+                            <Text style={estilos.textoVazio}>
+                                Conte algo sobre você para receber dicas personalizadas.
+                            </Text>
+                        )}
                         <Ionicons name="create-outline" size={20} color={cores.textoSuave} />
                     </View>
                 </Cartao>
@@ -136,8 +161,13 @@ export default function Perfil() {
                     <ItemLista
                         titulo="Trocar senha"
                         icone="lock-closed-outline"
-                        onPress={emBreve}
-                        direita={<Selo texto="Em breve" cor="neutro" />}
+                        onPress={perfil.abrirSenha}
+                    />
+                    <ItemLista
+                        divisor
+                        titulo="Sobre o App"
+                        icone="information-circle-outline"
+                        onPress={() => navigation.navigate("SobreApp")}
                     />
                     <ItemLista
                         divisor
@@ -155,13 +185,98 @@ export default function Perfil() {
                 </Cartao>
 
                 {/* ---------- EXCLUIR CONTA + VERSÃO ---------- */}
-                <Pressable onPress={emBreve} hitSlop={10} style={estilos.excluir}>
-                    <Text style={estilos.textoExcluir}>Excluir minha conta</Text>
+                <Pressable
+                    onPress={confirmarExclusao}
+                    disabled={perfil.excluindo}
+                    hitSlop={10}
+                    style={estilos.excluir}
+                >
+                    <Text style={estilos.textoExcluir}>
+                        {perfil.excluindo ? "Excluindo..." : "Excluir minha conta"}
+                    </Text>
                 </Pressable>
                 <Text style={estilos.versao}>
                     {NOME_DO_APP} · versão {Constants.expoConfig?.version ?? "-"}
                 </Text>
             </View>
+
+            {/* ---------- JANELAS DE EDIÇÃO (só uma aparece por vez) ---------- */}
+            <JanelaEdicao
+                visivel={perfil.janela === "nome"}
+                titulo="Editar nome"
+                erro={perfil.erro}
+                salvando={perfil.salvando}
+                onFechar={perfil.fechar}
+                onSalvar={perfil.salvar}
+            >
+                <CampoTexto
+                    rotulo="Nome"
+                    icone="person-outline"
+                    value={campos.nome}
+                    onChangeText={campos.setNome}
+                    maxLength={100}
+                    autoFocus
+                />
+            </JanelaEdicao>
+
+            <JanelaEdicao
+                visivel={perfil.janela === "sobreMim"}
+                titulo="Sobre mim"
+                erro={perfil.erro}
+                salvando={perfil.salvando}
+                onFechar={perfil.fechar}
+                onSalvar={perfil.salvar}
+            >
+                <Text style={estilos.ajuda}>
+                    A IA usa este texto para explicar o clima do jeito que importa para você. Ex.:
+                    &quot;Vou de bicicleta para o trabalho e tenho rinite.&quot;
+                </Text>
+                <CampoTexto
+                    rotulo="Sobre mim"
+                    alto
+                    value={campos.sobreMim}
+                    onChangeText={campos.setSobreMim}
+                    maxLength={TAMANHO_SOBRE_MIM}
+                    placeholder="Conte um pouco da sua rotina"
+                />
+                {/* contador: 35/200 */}
+                <Text style={estilos.contador}>
+                    {campos.sobreMim.length}/{TAMANHO_SOBRE_MIM}
+                </Text>
+            </JanelaEdicao>
+
+            <JanelaEdicao
+                visivel={perfil.janela === "senha"}
+                titulo="Trocar senha"
+                erro={perfil.erro}
+                salvando={perfil.salvando}
+                onFechar={perfil.fechar}
+                onSalvar={perfil.salvar}
+                textoSalvar="Trocar"
+            >
+                <CampoTexto
+                    rotulo="Senha atual"
+                    icone="lock-closed-outline"
+                    senha
+                    value={campos.senhaAtual}
+                    onChangeText={campos.setSenhaAtual}
+                />
+                <CampoTexto
+                    rotulo="Nova senha"
+                    icone="key-outline"
+                    senha
+                    placeholder="Mínimo de 6 caracteres"
+                    value={campos.novaSenha}
+                    onChangeText={campos.setNovaSenha}
+                />
+                <CampoTexto
+                    rotulo="Confirmar nova senha"
+                    icone="key-outline"
+                    senha
+                    value={campos.confirmacao}
+                    onChangeText={campos.setConfirmacao}
+                />
+            </JanelaEdicao>
         </TelaBase>
     );
 }
@@ -248,6 +363,25 @@ function criarEstilos(cores: Cores) {
         textoVazio: {
             flex: 1,
             fontSize: 14,
+            color: cores.textoSuave,
+        },
+        textoSobreMim: {
+            flex: 1,
+            fontSize: 14,
+            lineHeight: 20,
+            color: cores.texto,
+        },
+
+        // janelas de edição
+        ajuda: {
+            fontSize: 14,
+            lineHeight: 20,
+            color: cores.textoSecundario,
+        },
+        contador: {
+            alignSelf: "flex-end",
+            marginTop: -8,
+            fontSize: 12,
             color: cores.textoSuave,
         },
 

@@ -9,9 +9,17 @@ type Props = TextInputProps & {
     icone?: keyof typeof Ionicons.glyphMap; // o "?" quer dizer que é opcional
     erro?: string;
     senha?: boolean;
+    alto?: boolean; // caixa grande, para texto de várias linhas
 };
 
-export default function CampoTexto({ rotulo, icone, erro, senha = false, ...resto }: Props) {
+export default function CampoTexto({
+    rotulo,
+    icone,
+    erro,
+    senha = false,
+    alto = false,
+    ...resto
+}: Props) {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
 
@@ -25,12 +33,13 @@ export default function CampoTexto({ rotulo, icone, erro, senha = false, ...rest
         <View style={estilos.container}>
             <Text style={estilos.rotulo}>{rotulo}</Text>
 
-            <View style={[estilos.caixa, { borderColor: corDaBorda }]}>
+            <View style={[estilos.caixa, alto && estilos.caixaAlta, { borderColor: corDaBorda }]}>
                 {/* ícone da esquerda (só aparece se foi passado) */}
                 {icone && <Ionicons name={icone} size={20} color={cores.textoSuave} />}
 
                 <TextInput
-                    style={estilos.input}
+                    style={[estilos.input, alto && estilos.inputAlto]}
+                    multiline={alto}
                     placeholderTextColor={cores.textoSuave}
                     // se for senha e não estiver visível, mostra bolinhas
                     secureTextEntry={senha && !senhaVisivel}
@@ -77,10 +86,19 @@ function criarEstilos(cores: Cores) {
             borderWidth: 1,
             backgroundColor: cores.superficie,
         },
+        caixaAlta: {
+            height: 120,
+            alignItems: "flex-start",
+            paddingVertical: 12,
+        },
         input: {
             flex: 1, // ocupa todo o espaço que sobra entre os ícones
             fontSize: 15,
             color: cores.texto,
+        },
+        inputAlto: {
+            height: "100%",
+            textAlignVertical: "top", // no Android, o texto começa em cima (e não no meio)
         },
         erro: {
             fontSize: 13,

@@ -13,6 +13,7 @@ type AuthContextDados = {
     entrar: (email: string, senha: string) => Promise<void>;
     cadastrar: (nome: string, email: string, senha: string) => Promise<void>;
     sair: () => Promise<void>;
+    atualizarUsuario: (usuario: Usuario) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextDados | null>(null);
@@ -34,6 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
     }, []);
 
+    // token vencido (erro 401 em qualquer tela): sai da conta e avisa.
+    // O "jaAvisou" evita 3 avisos iguais quando 3 requisições dão 401 juntas.
     const jaAvisou = useRef(false);
 
     useEffect(() => {
@@ -48,6 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
     }, []);
 
+    // login: chama o authService, salva a sessão no celular e entra no app.
+    // Se der erro (ex.: senha errada), o erro "sobe" para a tela mostrar o toast.
     async function entrar(email: string, senha: string) {
         const sessao = await authService.entrar(email, senha);
         await salvarSessao(sessao);
@@ -72,11 +77,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         log.sessao("logout feito");
     }
 
+    // troca os dados do usuário guardados (o token continua o mesmo)
+    async function atualizarUsuario(novo: Usuario) {
+        const sessao = await buscarSessao();
+        if (sessao) {
+            await salvarSessao({ token: sessao.token, usuario: novo });
+        }
+        setUsuario(novo);
+    }
+
     // logado é true quando existe um usuário
     const logado = usuario !== null;
 
     return (
-        <AuthContext.Provider value={{ usuario, logado, carregando, entrar, cadastrar, sair }}>
+        <AuthContext.Provider
+            value={{ usuario, logado, carregando, entrar, cadastrar, sair, atualizarUsuario }}
+        >
             {children}
         </AuthContext.Provider>
     );
