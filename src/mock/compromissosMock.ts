@@ -35,6 +35,15 @@ async function doLocal(localId: number): Promise<Compromisso[]> {
     );
 }
 
+async function todos(): Promise<Compromisso[]> {
+    await esperar();
+    return copia(
+        compromissos
+            .filter((c) => c.data >= diaDaqui(0))
+            .sort((a, b) => a.data.localeCompare(b.data))
+    );
+}
+
 async function criar(localId: number, dados: CriarCompromisso): Promise<Compromisso> {
     await esperar();
     conferirData(dados.data);
@@ -57,4 +66,4 @@ async function remover(id: number): Promise<void> {
     compromissos = compromissos.filter((c) => c.id !== id);
 }
 
-export const compromissosMock = { doLocal, criar, editar, remover };
+export const compromissosMock = { doLocal, todos, criar, editar, remover };

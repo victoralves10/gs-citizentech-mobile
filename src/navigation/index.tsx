@@ -19,6 +19,7 @@ import Alertas from "../screens/Alertas";
 import DetalhesLocal from "../screens/DetalhesLocal";
 import Perfil from "../screens/Perfil";
 import SobreApp from "../screens/SobreApp";
+import MeusCompromissos from "../screens/MeusCompromissos";
 import NovoLocal from "../screens/NovoLocal";
 
 // cria os 2 navegadores (os dois conhecem a nossa lista de telas)
@@ -119,6 +120,11 @@ export default function Rotas() {
                             name="SobreApp"
                             component={SobreApp}
                             options={{ title: "Sobre o App" }}
+                        />
+                        <Pilha.Screen
+                            name="MeusCompromissos"
+                            component={MeusCompromissos}
+                            options={{ title: "Meus compromissos" }}
                         />
                         <Pilha.Screen
                             name="NovoLocal"

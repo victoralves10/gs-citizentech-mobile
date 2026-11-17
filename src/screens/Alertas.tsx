@@ -134,10 +134,17 @@ export default function Alertas() {
                         {dados.mudancas.length > 0 ? (
                             <View style={estilos.lista}>
                                 {dados.mudancas.map((mudanca) => (
-                                    <CartaoMudanca
+                                    <Pressable
                                         key={`${mudanca.id}-${mudanca.localId}`}
-                                        mudanca={mudanca}
-                                    />
+                                        onPress={() =>
+                                            navigation.navigate("DetalhesLocal", {
+                                                localId: mudanca.localId,
+                                                apelido: mudanca.localApelido,
+                                            })
+                                        }
+                                    >
+                                        <CartaoMudanca mudanca={mudanca} />
+                                    </Pressable>
                                 ))}
                             </View>
                         ) : (

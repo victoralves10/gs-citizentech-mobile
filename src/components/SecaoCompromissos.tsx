@@ -1,6 +1,7 @@
 // Lista os próximos compromissos e permite criar, editar e excluir.
 // Na linha aparece um resumo da previsão do dia; no menu, a previsão completa.
-// Toda a lógica está no hook useCompromissosLocal.
+// A lógica fica no hook useCompromissosLocal, criado na tela de Detalhes
+// (assim o atalho "Novo evento" do topo também abre a janela).
 import { useState } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,22 +15,21 @@ import SeletorData from "./SeletorData";
 import ResumoDoDia from "./ResumoDoDia";
 import { Compromisso } from "../models/Compromisso";
 import { Alerta, PrevisaoDia } from "../models/Previsao";
-import { useCompromissosLocal } from "../hooks/useCompromissosLocal";
+import { CompromissosDoLocal } from "../hooks/useCompromissosLocal";
 import { iconeDoClima } from "../utils/clima";
 import { dataCurta, porcentagem, temperatura } from "../utils/formatar";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
 type Props = {
-    localId: number;
+    c: CompromissosDoLocal; // o que o hook useCompromissosLocal devolve
     dias?: PrevisaoDia[]; // previsão de 16 dias do local (vem da API nos Detalhes)
     alertas?: Alerta[]; // alertas do local (hoje e próximos dias)
 };
 
-export default function SecaoCompromissos({ localId, dias = [], alertas = [] }: Props) {
+export default function SecaoCompromissos({ c, dias = [], alertas = [] }: Props) {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
-    const c = useCompromissosLocal(localId);
 
     // compromisso em que o usuário tocou (abre o menu com a previsão, Editar e Excluir)
     const [selecionado, setSelecionado] = useState<Compromisso | null>(null);

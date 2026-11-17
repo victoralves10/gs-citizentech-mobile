@@ -1,9 +1,10 @@
-import { ReactNode } from "react";
+import { ReactNode, Ref } from "react";
 import {
     KeyboardAvoidingView,
     Platform,
     RefreshControl,
     ScrollView,
+    ScrollViewInstance,
     StyleSheet,
     View,
 } from "react-native";
@@ -17,6 +18,7 @@ type Props = {
     semEspaco?: boolean; // tira o espaço das bordas (só quando rolar = false)
     aoAtualizar?: () => void; // com isso, puxar a tela para baixo atualiza
     atualizando?: boolean; // mostra a rodinha do "puxar para atualizar"
+    refRolagem?: Ref<ScrollViewInstance>; // deixa a tela rolar até uma seção (ex.: Detalhes)
 };
 
 export default function TelaBase({
@@ -26,6 +28,7 @@ export default function TelaBase({
     semEspaco = false,
     aoAtualizar,
     atualizando = false,
+    refRolagem,
 }: Props) {
     const { cores } = useTema();
 
@@ -44,6 +47,7 @@ export default function TelaBase({
             >
                 {rolar ? (
                     <ScrollView
+                        ref={refRolagem}
                         contentContainerStyle={estilos.conteudo}
                         // deixa tocar nos botões mesmo com o teclado aberto
                         keyboardShouldPersistTaps="handled"

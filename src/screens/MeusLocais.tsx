@@ -160,6 +160,12 @@ export default function MeusLocais() {
                     icone="add"
                     onPress={() => navigation.navigate("NovoLocal")}
                 />
+                <Botao
+                    texto="Pesquisar uma cidade"
+                    icone="search-outline"
+                    variante="contorno"
+                    onPress={() => navigation.navigate("Pesquisa")}
+                />
             </View>
         );
     }

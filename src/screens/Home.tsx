@@ -1,3 +1,5 @@
+// Primeira aba: tudo vem de UMA chamada só (GET /home, no hook useHome).
+// Tem atalhos para as outras áreas e "Ver todos" nas seções.
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,6 +16,7 @@ import ListaHoras from "../components/ListaHoras";
 import CartaoAlerta from "../components/CartaoAlerta";
 import CartaoMudanca from "../components/CartaoMudanca";
 import ChipsDicas from "../components/ChipsDicas";
+import Atalhos from "../components/Atalhos";
 import { useHome } from "../hooks/useHome";
 import { useAuth } from "../context/AuthContext";
 import { dataCurta, dataLonga, diaDeHoje } from "../utils/formatar";
@@ -128,6 +131,8 @@ export default function Home() {
                 {/* ---------- alertas de hoje ---------- */}
                 <TituloSecao
                     titulo="Alertas de hoje"
+                    textoAcao="Ver todos"
+                    onAcao={() => navigation.navigate("Alertas")}
                     selo={
                         dados.alertas.length > 0 ? (
                             <Selo texto={String(dados.alertas.length)} cor="erro" />
@@ -189,18 +194,57 @@ export default function Home() {
                     }
                 />
 
+                {/* ---------- atalhos para as outras áreas do app ---------- */}
+                <View style={estilos.atalhos}>
+                    <Atalhos
+                        itens={[
+                            {
+                                rotulo: "Locais",
+                                icone: "location-outline",
+                                onPress: () => navigation.navigate("MeusLocais"),
+                            },
+                            {
+                                rotulo: "Pesquisar",
+                                icone: "search-outline",
+                                onPress: () => navigation.navigate("Pesquisa"),
+                            },
+                            {
+                                rotulo: "Agenda",
+                                icone: "calendar-outline",
+                                onPress: () => navigation.navigate("MeusCompromissos"),
+                            },
+                            {
+                                rotulo: "Alertas",
+                                icone: "warning-outline",
+                                onPress: () => navigation.navigate("Alertas"),
+                            },
+                        ]}
+                    />
+                </View>
+
                 <View style={estilos.clima}>{parteDoClima()}</View>
 
                 {/* ---------- o que mudou (de TODOS os locais) ---------- */}
                 {dados && dados.mudancasNaPrevisao.length > 0 && (
                     <>
-                        <TituloSecao titulo="O que mudou na previsão" />
+                        <TituloSecao
+                            titulo="O que mudou na previsão"
+                            textoAcao="Ver tudo"
+                            onAcao={() => navigation.navigate("Alertas")}
+                        />
                         <View style={estilos.lista}>
                             {dados.mudancasNaPrevisao.map((mudanca) => (
-                                <CartaoMudanca
+                                <Pressable
                                     key={`${mudanca.id}-${mudanca.localId}`}
-                                    mudanca={mudanca}
-                                />
+                                    onPress={() =>
+                                        navigation.navigate("DetalhesLocal", {
+                                            localId: mudanca.localId,
+                                            apelido: mudanca.localApelido,
+                                        })
+                                    }
+                                >
+                                    <CartaoMudanca mudanca={mudanca} />
+                                </Pressable>
                             ))}
                         </View>
                     </>
@@ -209,7 +253,11 @@ export default function Home() {
                 {/* ---------- próximos compromissos ---------- */}
                 {dados && dados.compromissos.length > 0 && (
                     <>
-                        <TituloSecao titulo="Próximos compromissos" />
+                        <TituloSecao
+                            titulo="Próximos compromissos"
+                            textoAcao="Ver todos"
+                            onAcao={() => navigation.navigate("MeusCompromissos")}
+                        />
                         <Cartao semEspaco>
                             {dados.compromissos.map((compromisso, indice) => (
                                 <ItemLista
@@ -246,6 +294,9 @@ function criarEstilos(cores: Cores) {
             backgroundColor: cores.superficie,
             borderWidth: 1,
             borderColor: cores.borda,
+        },
+        atalhos: {
+            marginTop: 16,
         },
         clima: {
             marginTop: 16,

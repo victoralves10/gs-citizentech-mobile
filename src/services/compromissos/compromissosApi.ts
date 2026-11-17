@@ -11,6 +11,14 @@ async function doLocal(localId: number): Promise<Compromisso[]> {
     return resposta.data.itens;
 }
 
+// GET /compromissos (todos os locais, de hoje em diante, do mais perto ao mais longe)
+async function todos(): Promise<Compromisso[]> {
+    const resposta = await api.get<Pagina<Compromisso>>("/compromissos", {
+        params: { pagina: 0, tamanho: 50 },
+    });
+    return resposta.data.itens;
+}
+
 // POST /locais/{id}/compromissos
 async function criar(localId: number, dados: CriarCompromisso): Promise<Compromisso> {
     const resposta = await api.post<Compromisso>(`/locais/${localId}/compromissos`, dados);
@@ -28,4 +36,4 @@ async function remover(id: number): Promise<void> {
     await api.delete(`/compromissos/${id}`);
 }
 
-export const compromissosApi = { doLocal, criar, editar, remover };
+export const compromissosApi = { doLocal, todos, criar, editar, remover };

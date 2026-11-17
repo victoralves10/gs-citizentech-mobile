@@ -107,3 +107,6 @@ export function useCompromissosLocal(localId: number) {
         excluir,
     };
 }
+
+// o tipo do que o hook devolve (a SecaoCompromissos recebe isso pronto)
+export type CompromissosDoLocal = ReturnType<typeof useCompromissosLocal>;

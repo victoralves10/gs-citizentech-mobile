@@ -1,4 +1,7 @@
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+// Detalhes de um local: tudo vem de GET /locais/{id}/previsao (hook useDetalhesLocal).
+// Os atalhos do topo rolam até Alertas ou Agenda, ou abrem "Novo evento" direto.
+import { useRef } from "react";
+import { ActivityIndicator, ScrollViewInstance, StyleSheet, Text, View } from "react-native";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import TelaBase from "../components/TelaBase";
@@ -6,6 +9,7 @@ import TituloSecao from "../components/TituloSecao";
 import Cartao from "../components/Cartao";
 import Botao from "../components/Botao";
 import SecaoCompromissos from "../components/SecaoCompromissos";
+import Atalhos from "../components/Atalhos";
 import CartaoClimaAgora from "../components/CartaoClimaAgora";
 import Indicadores from "../components/Indicadores";
 import ListaHoras from "../components/ListaHoras";
@@ -13,6 +17,7 @@ import ListaDias from "../components/ListaDias";
 import CartaoAlerta from "../components/CartaoAlerta";
 import CartaoMudanca from "../components/CartaoMudanca";
 import { useDetalhesLocal } from "../hooks/useDetalhesLocal";
+import { useCompromissosLocal } from "../hooks/useCompromissosLocal";
 import { ListaDeTelas } from "../navigation/tipos";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
@@ -26,6 +31,14 @@ export default function DetalhesLocal() {
     const { dados, carregando, atualizando, erro, atualizar } = useDetalhesLocal(
         rota.params.localId
     );
+    const compromissos = useCompromissosLocal(rota.params.localId);
+
+    // para os atalhos do topo rolarem a tela até a seção certa
+    const rolagem = useRef<ScrollViewInstance>(null);
+    const posicoes = useRef({ alertas: 0, compromissos: 0 });
+    function rolarAte(secao: "alertas" | "compromissos") {
+        rolagem.current?.scrollTo({ y: posicoes.current[secao], animated: true });
+    }
 
     // ---------- carregando / erro ----------
     if (carregando) {
@@ -51,13 +64,41 @@ export default function DetalhesLocal() {
     const { local } = dados;
 
     return (
-        <TelaBase comCabecalho aoAtualizar={atualizar} atualizando={atualizando}>
+        <TelaBase
+            comCabecalho
+            aoAtualizar={atualizar}
+            atualizando={atualizando}
+            refRolagem={rolagem}
+        >
             <View>
                 {/* "Vila Mariana · São Paulo, SP" */}
                 <Text style={estilos.endereco}>
                     {local.nome} · {local.cidade}
                     {local.uf ? `, ${local.uf}` : ""}
                 </Text>
+
+                {/* ---------- atalhos: rolar até uma seção ou criar compromisso ---------- */}
+                <View style={estilos.atalhos}>
+                    <Atalhos
+                        itens={[
+                            {
+                                rotulo: "Alertas",
+                                icone: "warning-outline",
+                                onPress: () => rolarAte("alertas"),
+                            },
+                            {
+                                rotulo: "Agenda",
+                                icone: "calendar-outline",
+                                onPress: () => rolarAte("compromissos"),
+                            },
+                            {
+                                rotulo: "Novo evento",
+                                icone: "add-circle-outline",
+                                onPress: compromissos.abrirNovo,
+                            },
+                        ]}
+                    />
+                </View>
 
                 {/* ---------- a previsão ainda está chegando ---------- */}
                 {!dados.climaAtual ? (
@@ -85,31 +126,33 @@ export default function DetalhesLocal() {
                         </View>
 
                         {/* ---------- alertas (hoje e próximos dias) ---------- */}
-                        <TituloSecao titulo="Alertas" />
-                        {dados.alertas.length > 0 ? (
-                            <View style={estilos.lista}>
-                                {dados.alertas.map((alerta, indice) => (
-                                    <CartaoAlerta
-                                        key={alerta.id ?? indice}
-                                        alerta={alerta}
-                                        mostrarDia
-                                    />
-                                ))}
-                            </View>
-                        ) : (
-                            <Cartao>
-                                <View style={estilos.semAlerta}>
-                                    <Ionicons
-                                        name="checkmark-circle"
-                                        size={22}
-                                        color={cores.sucesso}
-                                    />
-                                    <Text style={estilos.textoSemAlerta}>
-                                        Nenhum alerta nos próximos dias.
-                                    </Text>
+                        <View onLayout={(e) => (posicoes.current.alertas = e.nativeEvent.layout.y)}>
+                            <TituloSecao titulo="Alertas" />
+                            {dados.alertas.length > 0 ? (
+                                <View style={estilos.lista}>
+                                    {dados.alertas.map((alerta, indice) => (
+                                        <CartaoAlerta
+                                            key={alerta.id ?? indice}
+                                            alerta={alerta}
+                                            mostrarDia
+                                        />
+                                    ))}
                                 </View>
-                            </Cartao>
-                        )}
+                            ) : (
+                                <Cartao>
+                                    <View style={estilos.semAlerta}>
+                                        <Ionicons
+                                            name="checkmark-circle"
+                                            size={22}
+                                            color={cores.sucesso}
+                                        />
+                                        <Text style={estilos.textoSemAlerta}>
+                                            Nenhum alerta nos próximos dias.
+                                        </Text>
+                                    </View>
+                                </Cartao>
+                            )}
+                        </View>
 
                         {/* ---------- 48 horas ---------- */}
                         {dados.previsaoPorHora.length > 0 && (
@@ -144,11 +187,13 @@ export default function DetalhesLocal() {
                 )}
 
                 {/* ---------- compromissos ---------- */}
-                <SecaoCompromissos
-                    localId={local.id}
-                    dias={dados.previsaoDiaria}
-                    alertas={dados.alertas}
-                />
+                <View onLayout={(e) => (posicoes.current.compromissos = e.nativeEvent.layout.y)}>
+                    <SecaoCompromissos
+                        c={compromissos}
+                        dias={dados.previsaoDiaria}
+                        alertas={dados.alertas}
+                    />
+                </View>
             </View>
         </TelaBase>
     );
@@ -163,6 +208,9 @@ function criarEstilos(cores: Cores) {
             fontSize: 14,
             color: cores.textoSecundario,
             marginBottom: 12,
+        },
+        atalhos: {
+            marginBottom: 16,
         },
         bloco: {
             gap: 12,
