@@ -1,31 +1,58 @@
 // Lista os próximos compromissos e permite criar, editar e excluir.
+// Na linha aparece um resumo da previsão do dia; no menu, a previsão completa.
 // Toda a lógica está no hook useCompromissosLocal.
 import { useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import Cartao from "./Cartao";
 import ItemLista from "./ItemLista";
 import TituloSecao from "./TituloSecao";
 import JanelaEdicao from "./JanelaEdicao";
 import CampoTexto from "./CampoTexto";
 import MenuOpcoes from "./MenuOpcoes";
+import SeletorData from "./SeletorData";
+import ResumoDoDia from "./ResumoDoDia";
 import { Compromisso } from "../models/Compromisso";
+import { Alerta, PrevisaoDia } from "../models/Previsao";
 import { useCompromissosLocal } from "../hooks/useCompromissosLocal";
-import { apiParaCampo, mascaraData, proximosDias } from "../utils/campoData";
-import { dataCurta, diaSemana } from "../utils/formatar";
+import { iconeDoClima } from "../utils/clima";
+import { dataCurta, porcentagem, temperatura } from "../utils/formatar";
 import { useTema } from "../theme/TemaContext";
-import { Cores, transparente } from "../theme/cores";
+import { Cores } from "../theme/cores";
 
 type Props = {
     localId: number;
+    dias?: PrevisaoDia[]; // previsão de 16 dias do local (vem da API nos Detalhes)
+    alertas?: Alerta[]; // alertas do local (hoje e próximos dias)
 };
 
-export default function SecaoCompromissos({ localId }: Props) {
+export default function SecaoCompromissos({ localId, dias = [], alertas = [] }: Props) {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
     const c = useCompromissosLocal(localId);
 
-    // compromisso em que o usuário tocou (abre o menu Editar / Excluir)
+    // compromisso em que o usuário tocou (abre o menu com a previsão, Editar e Excluir)
     const [selecionado, setSelecionado] = useState<Compromisso | null>(null);
+
+    // a previsão do dia de um compromisso (ou undefined se estiver fora dos 16 dias)
+    function diaDo(compromisso: Compromisso) {
+        return dias.find((d) => d.data === compromisso.data.slice(0, 10));
+    }
+
+    // resumo na direita da linha: ícone, mín/máx e chance de chuva
+    function resumo(compromisso: Compromisso) {
+        const dia = diaDo(compromisso);
+        if (!dia) return undefined;
+        return (
+            <View style={estilos.resumo}>
+                <Ionicons name={iconeDoClima(dia.categoria)} size={18} color={cores.primaria} />
+                <Text style={estilos.temperaturas}>
+                    {temperatura(dia.temperaturaMinima)}/{temperatura(dia.temperaturaMaxima)}
+                </Text>
+                <Text style={estilos.chuva}>{porcentagem(dia.probabilidadeChuva)}</Text>
+            </View>
+        );
+    }
 
     function confirmarExclusao(compromisso: Compromisso) {
         Alert.alert(`Excluir "${compromisso.nome}"?`, "Isso não pode ser desfeito.", [
@@ -51,6 +78,7 @@ export default function SecaoCompromissos({ localId }: Props) {
                             descricao={dataCurta(compromisso.data)}
                             icone="calendar-outline"
                             divisor={indice > 0}
+                            direita={resumo(compromisso)}
                             onPress={() => setSelecionado(compromisso)}
                         />
                     ))}
@@ -65,7 +93,7 @@ export default function SecaoCompromissos({ localId }: Props) {
                 </Cartao>
             )}
 
-            {/* ---------- menu: editar ou excluir ---------- */}
+            {/* ---------- menu: previsão do dia + editar ou excluir ---------- */}
             <MenuOpcoes
                 visivel={selecionado !== null}
                 titulo={selecionado?.nome ?? ""}
@@ -84,7 +112,14 @@ export default function SecaoCompromissos({ localId }: Props) {
                         onPress: () => selecionado && confirmarExclusao(selecionado),
                     },
                 ]}
-            />
+            >
+                {selecionado && (
+                    <ResumoDoDia
+                        dia={diaDo(selecionado)}
+                        alertas={alertas.filter((a) => a.dia === selecionado.data.slice(0, 10))}
+                    />
+                )}
+            </MenuOpcoes>
 
             {/* ---------- janela de criar / editar ---------- */}
             <JanelaEdicao
@@ -103,38 +138,7 @@ export default function SecaoCompromissos({ localId }: Props) {
                     onChangeText={c.setNome}
                     maxLength={80}
                 />
-                <CampoTexto
-                    rotulo="Data"
-                    icone="calendar-outline"
-                    placeholder="DD/MM/AAAA"
-                    keyboardType="number-pad"
-                    value={c.data}
-                    onChangeText={(texto) => c.setData(mascaraData(texto))}
-                />
-
-                {/* atalhos: os próximos 7 dias */}
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <View style={estilos.atalhos}>
-                        {proximosDias(7).map((dia, indice) => {
-                            const campo = apiParaCampo(dia);
-                            const ativo = c.data === campo;
-                            return (
-                                <Pressable
-                                    key={dia}
-                                    onPress={() => c.setData(campo)}
-                                    style={[estilos.atalho, ativo && estilos.atalhoAtivo]}
-                                >
-                                    <Text style={[estilos.dia, ativo && estilos.textoAtivo]}>
-                                        {indice === 1 ? "Amanhã" : diaSemana(dia)}
-                                    </Text>
-                                    <Text style={[estilos.data, ativo && estilos.textoAtivo]}>
-                                        {campo.slice(0, 5)}
-                                    </Text>
-                                </Pressable>
-                            );
-                        })}
-                    </View>
-                </ScrollView>
+                <SeletorData rotulo="Data" valor={c.data} onMudar={c.setData} />
             </JanelaEdicao>
         </View>
     );
@@ -146,34 +150,19 @@ function criarEstilos(cores: Cores) {
             fontSize: 14,
             color: cores.textoSecundario,
         },
-        atalhos: {
+        resumo: {
             flexDirection: "row",
-            gap: 8,
-        },
-        atalho: {
             alignItems: "center",
-            paddingHorizontal: 12,
-            paddingVertical: 8,
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: cores.borda,
-            backgroundColor: cores.superficie,
+            gap: 6,
         },
-        atalhoAtivo: {
-            borderColor: cores.primaria,
-            backgroundColor: transparente(cores.primaria, 0.12),
-        },
-        dia: {
+        temperaturas: {
             fontSize: 13,
             fontWeight: "700",
             color: cores.texto,
         },
-        data: {
+        chuva: {
             fontSize: 12,
             color: cores.textoSecundario,
-        },
-        textoAtivo: {
-            color: cores.primaria,
         },
     });
 }

@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,9 +20,17 @@ type Props = {
     subtitulo?: string;
     opcoes: Opcao[];
     onFechar: () => void;
+    children?: ReactNode; // conteúdo extra entre o título e as opções
 };
 
-export default function MenuOpcoes({ visivel, titulo, subtitulo, opcoes, onFechar }: Props) {
+export default function MenuOpcoes({
+    visivel,
+    titulo,
+    subtitulo,
+    opcoes,
+    onFechar,
+    children,
+}: Props) {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
     const { bottom } = useSafeAreaInsets();
@@ -44,6 +53,7 @@ export default function MenuOpcoes({ visivel, titulo, subtitulo, opcoes, onFecha
                         <Text style={estilos.titulo}>{titulo}</Text>
                         {subtitulo && <Text style={estilos.subtitulo}>{subtitulo}</Text>}
                     </View>
+                    {children}
 
                     <Cartao semEspaco>
                         {opcoes.map((opcao, indice) => (

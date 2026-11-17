@@ -144,7 +144,11 @@ export default function DetalhesLocal() {
                 )}
 
                 {/* ---------- compromissos ---------- */}
-                <SecaoCompromissos localId={local.id} />
+                <SecaoCompromissos
+                    localId={local.id}
+                    dias={dados.previsaoDiaria}
+                    alertas={dados.alertas}
+                />
             </View>
         </TelaBase>
     );

@@ -2,7 +2,7 @@
 // Busca a previsão de cada local ao mesmo tempo (GET /locais/{id}/previsao).
 import { useCallback, useRef, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
-import { Alerta, Mudanca } from "../models/Previsao";
+import { Alerta, Mudanca, RespostaPrevisao } from "../models/Previsao";
 import { locaisService } from "../services/locais/locaisService";
 import { previsaoService } from "../services/previsao/previsaoService";
 import { mensagemDeErro } from "../services/api";
@@ -40,7 +40,7 @@ export function useAlertas() {
             const comAlerta = pagina.itens.filter((l) => l.receberAlertas);
 
             // um local com erro não derruba os outros
-            const respostas = await Promise.allSettled(
+            const respostas: PromiseSettledResult<RespostaPrevisao>[] = await Promise.allSettled(
                 comAlerta.map((l) => previsaoService.doLocal(l.id))
             );
 
@@ -49,7 +49,7 @@ export function useAlertas() {
             respostas.forEach((r, i) => {
                 if (r.status !== "fulfilled") return;
                 const local = comAlerta[i];
-                r.value.alertas.forEach((alerta, j) =>
+                r.value.alertas.forEach((alerta: Alerta, j: number) =>
                     alertas.push({
                         chave: `${local.id}-${alerta.id ?? j}`,
                         alerta,

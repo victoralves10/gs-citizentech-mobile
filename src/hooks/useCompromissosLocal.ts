@@ -1,10 +1,9 @@
-// Lista, cria, edita e exclui. A mesma janela serve para criar e editar:
-// se "editando" tem um compromisso, salvar faz PUT; se não, faz POST.
+// Lista, cria, edita e exclui os compromissos de um local (usado nos Detalhes).
+// A mesma janela serve para criar e editar: com "editando" faz PUT, sem faz POST.
 import { useEffect, useState } from "react";
 import { Compromisso } from "../models/Compromisso";
 import { compromissosService } from "../services/compromissos/compromissosService";
 import { mensagemDeErro } from "../services/api";
-import { apiParaCampo, campoParaApi } from "../utils/campoData";
 import { toastErro, toastSucesso } from "../utils/toast";
 
 export function useCompromissosLocal(localId: number) {
@@ -15,7 +14,7 @@ export function useCompromissosLocal(localId: number) {
     const [aberta, setAberta] = useState(false);
     const [editando, setEditando] = useState<Compromisso | null>(null);
     const [nome, setNome] = useState("");
-    const [data, setData] = useState(""); // "25/11/2026"
+    const [data, setData] = useState(""); // formato da API: "2026-11-25"
     const [erro, setErro] = useState<string>();
     const [salvando, setSalvando] = useState(false);
 
@@ -47,15 +46,14 @@ export function useCompromissosLocal(localId: number) {
     function abrirEdicao(compromisso: Compromisso) {
         setEditando(compromisso);
         setNome(compromisso.nome);
-        setData(apiParaCampo(compromisso.data));
+        setData(compromisso.data.slice(0, 10)); // "2026-11-25T00:00:00" → "2026-11-25"
         setErro(undefined);
         setAberta(true);
     }
 
     async function salvar() {
-        const dataApi = campoParaApi(data);
         if (!nome.trim()) return setErro("Dê um nome ao compromisso.");
-        if (!dataApi) return setErro("Data inválida. Use DD/MM/AAAA.");
+        if (!data) return setErro("Escolha a data do compromisso.");
 
         setErro(undefined);
         setSalvando(true);
@@ -63,12 +61,12 @@ export function useCompromissosLocal(localId: number) {
             if (editando) {
                 await compromissosService.editar(editando.id, {
                     nome: nome.trim(),
-                    data: dataApi,
+                    data,
                     localId,
                 });
                 toastSucesso("Compromisso atualizado!");
             } else {
-                await compromissosService.criar(localId, { nome: nome.trim(), data: dataApi });
+                await compromissosService.criar(localId, { nome: nome.trim(), data });
                 toastSucesso("Compromisso marcado!");
             }
             setAberta(false);
