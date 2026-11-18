@@ -1,5 +1,5 @@
 // Tela de Perfil: nome, senha, aparência, Sobre o App, sair e excluir conta.
-// Toda a lógica está no hook usePerfil. Notificações são só visuais ("Em breve").
+// Toda a lógica está no hook usePerfil.
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -10,8 +10,6 @@ import Cartao from "../components/Cartao";
 import TituloSecao from "../components/TituloSecao";
 import ItemLista from "../components/ItemLista";
 import Segmentado from "../components/Segmentado";
-import Selo from "../components/Selo";
-import Interruptor from "../components/Interruptor";
 import JanelaEdicao from "../components/JanelaEdicao";
 import CampoTexto from "../components/CampoTexto";
 import { NOME_DO_APP } from "../components/Marca";
@@ -19,16 +17,6 @@ import { useTema } from "../theme/TemaContext";
 import { useAuth } from "../context/AuthContext";
 import { usePerfil } from "../hooks/usePerfil";
 import { Cores } from "../theme/cores";
-
-// os tipos de notificação que o app vai ter (por enquanto só os títulos)
-const NOTIFICACOES = [
-    { titulo: "Resumo diário", icone: "sunny-outline" },
-    { titulo: "Alertas do dia", icone: "warning-outline" },
-    { titulo: "Chuva chegando", icone: "rainy-outline" },
-    { titulo: "A previsão mudou", icone: "trending-down-outline" },
-    { titulo: "Eventos", icone: "calendar-outline" },
-    { titulo: "Silêncio à noite", icone: "moon-outline" },
-] as const;
 
 // pega as iniciais do nome: "Victor Alves" → "VA", "Victor" → "V"
 function iniciais(nome?: string) {
@@ -108,23 +96,6 @@ export default function Perfil() {
                         <Ionicons name="create-outline" size={22} color={cores.textoSobreCor} />
                     </LinearGradient>
                 </Pressable>
-
-                {/* ---------- NOTIFICAÇÕES (só visual) ---------- */}
-                <TituloSecao
-                    titulo="Notificações"
-                    selo={<Selo texto="Em breve" cor="alerta" icone="time-outline" />}
-                />
-                <Cartao semEspaco>
-                    {NOTIFICACOES.map((item, indice) => (
-                        <ItemLista
-                            key={item.titulo}
-                            titulo={item.titulo}
-                            icone={item.icone}
-                            divisor={indice > 0} // linha fina em todos menos no primeiro
-                            direita={<Interruptor valor={false} desabilitado />}
-                        />
-                    ))}
-                </Cartao>
 
                 {/* ---------- APARÊNCIA (funciona) ---------- */}
                 <TituloSecao titulo="Aparência" />
