@@ -1,6 +1,4 @@
-// Tela de Perfil: nome, senha, aparência, Sobre o App, sair e excluir conta.
-// Toda a lógica está no hook usePerfil.
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,56 +12,25 @@ import JanelaEdicao from "../components/JanelaEdicao";
 import CampoTexto from "../components/CampoTexto";
 import { NOME_DO_APP } from "../components/Marca";
 import { useTema } from "../theme/TemaContext";
-import { useAuth } from "../context/AuthContext";
 import { usePerfil } from "../hooks/usePerfil";
+import { iniciais } from "../utils/formatar";
 import { Cores } from "../theme/cores";
 
-// pega as iniciais do nome: "Victor Alves" → "VA", "Victor" → "V"
-function iniciais(nome?: string) {
-    if (!nome) return "?";
-    const partes = nome.trim().split(/\s+/); // separa por espaços
-    const primeira = partes[0].charAt(0);
-    const ultima = partes.length > 1 ? partes[partes.length - 1].charAt(0) : "";
-    return (primeira + ultima).toUpperCase();
-}
-
+// Perfil: nome, senha, aparência, Sobre o App, sair e excluir conta
 export default function Perfil() {
     const { cores, preferencia, mudarPreferencia } = useTema();
     const estilos = criarEstilos(cores);
     const navigation = useNavigation();
-    const { sair } = useAuth();
 
-    // tudo que a tela precisa vem do hook
     const perfil = usePerfil();
     const { usuario, campos } = perfil;
 
-    // pergunta antes de sair (Alert = a caixinha de confirmação do próprio celular)
-    function confirmarSaida() {
-        Alert.alert("Sair da conta", "Tem certeza que deseja sair?", [
-            { text: "Cancelar", style: "cancel" },
-            { text: "Sair", style: "destructive", onPress: sair },
-        ]);
-    }
-
-    // pergunta antes de excluir: não tem volta!
-    function confirmarExclusao() {
-        Alert.alert(
-            "Excluir minha conta",
-            "Seus locais e compromissos também serão apagados. Isso não pode ser desfeito.",
-            [
-                { text: "Cancelar", style: "cancel" },
-                { text: "Excluir", style: "destructive", onPress: perfil.excluirConta },
-            ]
-        );
-    }
-
     return (
         <TelaBase>
-            {/* View única: assim o espaço entre as seções é controlado pelo TituloSecao */}
             <View>
                 <Text style={estilos.tituloTela}>Perfil</Text>
 
-                {/* ---------- CARTÃO DO USUÁRIO (degradê): tocar edita o nome ---------- */}
+                {/* Cartão do usuário (tocar edita o nome) */}
                 <Pressable onPress={perfil.abrirNome}>
                     <LinearGradient
                         colors={[cores.primaria, cores.primariaForte]}
@@ -71,7 +38,6 @@ export default function Perfil() {
                         end={{ x: 1, y: 1 }}
                         style={estilos.cartaoUsuario}
                     >
-                        {/* enfeite: bolha de luz no canto */}
                         <View style={estilos.bolha} />
 
                         <View style={estilos.avatar}>
@@ -97,7 +63,7 @@ export default function Perfil() {
                     </LinearGradient>
                 </Pressable>
 
-                {/* ---------- APARÊNCIA (funciona) ---------- */}
+                {/* Aparência */}
                 <TituloSecao titulo="Aparência" />
                 <Segmentado
                     opcoes={[
@@ -109,7 +75,7 @@ export default function Perfil() {
                     onMudar={mudarPreferencia}
                 />
 
-                {/* ---------- CONTA ---------- */}
+                {/* Conta */}
                 <TituloSecao titulo="Conta" />
                 <Cartao semEspaco>
                     <ItemLista
@@ -134,13 +100,13 @@ export default function Perfil() {
                         perigo
                         titulo="Sair"
                         icone="log-out-outline"
-                        onPress={confirmarSaida}
+                        onPress={perfil.pedirSaida}
                     />
                 </Cartao>
 
-                {/* ---------- EXCLUIR CONTA + VERSÃO ---------- */}
+                {/* Excluir conta e versão */}
                 <Pressable
-                    onPress={confirmarExclusao}
+                    onPress={perfil.excluirConta}
                     disabled={perfil.excluindo}
                     hitSlop={10}
                     style={estilos.excluir}
@@ -154,7 +120,7 @@ export default function Perfil() {
                 </Text>
             </View>
 
-            {/* ---------- JANELAS DE EDIÇÃO (só uma aparece por vez) ---------- */}
+            {/* Janelas de edição */}
             <JanelaEdicao
                 visivel={perfil.janela === "nome"}
                 titulo="Editar nome"
@@ -218,7 +184,6 @@ function criarEstilos(cores: Cores) {
             marginBottom: 16,
         },
 
-        // cartão do usuário
         cartaoUsuario: {
             flexDirection: "row",
             alignItems: "center",
@@ -282,7 +247,6 @@ function criarEstilos(cores: Cores) {
             color: cores.textoSobreCor,
         },
 
-        // rodapé
         excluir: {
             alignSelf: "center",
             marginTop: 24,

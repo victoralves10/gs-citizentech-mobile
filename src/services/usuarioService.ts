@@ -1,7 +1,6 @@
-// Perfil na API Java (/usuarios/me): buscar, trocar nome, trocar senha e excluir conta.
-// A API descobre quem é o usuário pelo token, então nenhuma rota precisa do id.
-import { api } from "../api";
-import { Usuario } from "../../models/Usuario";
+// Perfil na API Java (/usuarios/me, o usuário vem do token)
+import { api } from "./api";
+import { Usuario } from "../models/Usuario";
 
 async function buscar(): Promise<Usuario> {
     const resposta = await api.get<Usuario>("/usuarios/me");
@@ -21,4 +20,4 @@ async function excluirConta(): Promise<void> {
     await api.delete("/usuarios/me");
 }
 
-export const usuarioApi = { buscar, alterarNome, alterarSenha, excluirConta };
+export const usuarioService = { buscar, alterarNome, alterarSenha, excluirConta };

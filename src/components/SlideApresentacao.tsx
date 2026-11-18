@@ -4,6 +4,7 @@ import { PaginaApresentacao } from "../data/apresentacao";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
+// Uma página da apresentação
 type Props = {
     pagina: PaginaApresentacao;
     largura: number; // largura da página (= largura da tela)
@@ -14,15 +15,12 @@ export default function SlideApresentacao({ pagina, largura, altura }: Props) {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
 
-    // tamanho da tela agora (muda se girar o celular)
     const { height: alturaTela } = useWindowDimensions();
 
-    // o quadrado da imagem: o menor entre 78% da largura e 42% da altura
     const tamanho = Math.min(largura * 0.78, alturaTela * 0.42);
 
     return (
         <View style={[estilos.pagina, { width: largura, height: altura }]}>
-            {/* se a página tiver imagem própria, mostra ela; se não, a ilustração em código */}
             {pagina.imagem ? (
                 <Image
                     source={pagina.imagem}

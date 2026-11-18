@@ -7,17 +7,18 @@ import { dataCurta, tempoAtras } from "../utils/formatar";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
+// Cartão do "O que mudou": antes → agora ou um alerta novo
 type Props = {
     mudanca: Mudanca;
+    onPress?: () => void;
 };
 
-export default function CartaoMudanca({ mudanca }: Props) {
+export default function CartaoMudanca({ mudanca, onPress }: Props) {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
 
     return (
-        <Cartao>
-            {/* topo: local · dia ......... há quanto tempo */}
+        <Cartao onPress={onPress}>
             <View style={estilos.topo}>
                 <Text style={estilos.local} numberOfLines={1}>
                     {mudanca.localApelido} · {dataCurta(mudanca.dia)}
@@ -26,7 +27,7 @@ export default function CartaoMudanca({ mudanca }: Props) {
             </View>
 
             {mudanca.motivo === "ALERTA" ? (
-                // ---------- surgiu um alerta ----------
+                // Surgiu um alerta
                 <View style={estilos.linha}>
                     <Ionicons
                         name={iconeDoAlerta(mudanca.tipoAlerta)}
@@ -39,7 +40,7 @@ export default function CartaoMudanca({ mudanca }: Props) {
                     </Text>
                 </View>
             ) : (
-                // ---------- antes → agora ----------
+                // Antes → agora
                 <View style={estilos.linha}>
                     <Ionicons
                         name={iconeDoClima(mudanca.categoriaAnterior)}

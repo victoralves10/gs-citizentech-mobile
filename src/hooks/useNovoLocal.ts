@@ -1,22 +1,20 @@
 import { useState } from "react";
 import { Lugar } from "../models/Lugar";
-import { locaisService } from "../services/locais/locaisService";
+import { locaisService } from "../services/locaisService";
 import { mensagemDeErro } from "../services/api";
 import { toastSucesso } from "../utils/toast";
 import { useBuscaLugares } from "./useBuscaLugares";
 
+// Novo local: 1) buscar o lugar  2) dar um apelido e salvar
 export function useNovoLocal(lugarInicial?: Lugar) {
-    // ---------- passo 1: busca ----------
     const busca = useBuscaLugares();
 
-    // ---------- passo 2: o lugar escolhido e o formulário ----------
     const [escolhido, setEscolhido] = useState<Lugar | null>(lugarInicial ?? null);
     const [apelido, setApelido] = useState("");
     const [receberAlertas, setReceberAlertas] = useState(true);
     const [salvando, setSalvando] = useState(false);
     const [erro, setErro] = useState<string>();
 
-    // ---------- escolher e trocar o lugar ----------
     function escolher(lugar: Lugar) {
         setEscolhido(lugar);
         setErro(undefined);
@@ -27,8 +25,7 @@ export function useNovoLocal(lugarInicial?: Lugar) {
         setErro(undefined);
     }
 
-    // ---------- salvar (POST /locais) ----------
-    // devolve true quando deu certo (a tela então volta para a tela anterior)
+    // devolve true quando salvou (a tela então volta)
     async function salvar(): Promise<boolean> {
         if (!escolhido) return false;
         if (!apelido.trim()) {
@@ -53,7 +50,6 @@ export function useNovoLocal(lugarInicial?: Lugar) {
             toastSucesso(`${apelido.trim()} foi salvo!`);
             return true;
         } catch (e) {
-            // ex.: "Já existe um local com este apelido" (vem da API)
             setErro(mensagemDeErro(e));
             return false;
         } finally {
@@ -62,7 +58,7 @@ export function useNovoLocal(lugarInicial?: Lugar) {
     }
 
     return {
-        ...busca, // busca, mudarBusca, resultados, buscando, erroBusca, buscaCurta
+        busca,
         escolhido,
         escolher,
         trocarLugar,

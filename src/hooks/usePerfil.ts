@@ -1,70 +1,48 @@
-// Toda a lógica da tela Perfil: busca os dados, edita nome e senha e exclui a conta.
-// Só uma janela fica aberta por vez ("nome", "senha" ou null).
 import { useCallback, useState } from "react";
+import { Alert } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
-import { usuarioService } from "../services/usuario/usuarioService";
+import { usuarioService } from "../services/usuarioService";
 import { mensagemDeErro } from "../services/api";
+import { confirmarExclusao } from "../utils/confirmar";
 import { toastErro, toastSucesso } from "../utils/toast";
 
 type Janela = "nome" | "senha" | null;
 
+// Perfil: editar nome e senha, sair e excluir a conta (uma janela por vez)
 export function usePerfil() {
     const { usuario, atualizarUsuario, sair } = useAuth();
 
-    // qual janela está aberta
     const [janela, setJanela] = useState<Janela>(null);
-
-    // os campos das janelas
     const [nome, setNome] = useState("");
     const [senhaAtual, setSenhaAtual] = useState("");
     const [novaSenha, setNovaSenha] = useState("");
     const [confirmacao, setConfirmacao] = useState("");
-
-    // erro mostrado dentro da janela e rodinha do botão Salvar
     const [erro, setErro] = useState<string>();
     const [salvando, setSalvando] = useState(false);
     const [excluindo, setExcluindo] = useState(false);
 
-    // ---------- quando a tela aparece: busca os dados atualizados ----------
-    // (useFocusEffect roda toda vez que o usuário entra na aba Perfil)
+    // atualiza os dados sempre que a aba aparece (sem internet, mantém os guardados)
     useFocusEffect(
         useCallback(() => {
             usuarioService
                 .buscar()
                 .then(atualizarUsuario)
-                .catch(() => {
-                    // sem internet: continua mostrando o que já estava guardado
-                });
+                .catch(() => {});
             // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [])
     );
 
-    // ---------- abrir e fechar ----------
-    function abrirNome() {
+    function abrir(qual: Janela) {
         setNome(usuario?.nome ?? "");
-        abrir("nome");
-    }
-
-    function abrirSenha() {
         setSenhaAtual("");
         setNovaSenha("");
         setConfirmacao("");
-        abrir("senha");
-    }
-
-    function abrir(qual: Janela) {
         setErro(undefined);
         setJanela(qual);
     }
 
-    function fechar() {
-        setJanela(null);
-    }
-
-    // ---------- salvar (a mesma função serve para as 2 janelas) ----------
     async function salvar() {
-        // conferência rápida antes de chamar a API (o resto a API confere)
         if (janela === "nome" && !nome.trim()) {
             return setErro("Informe o seu nome.");
         }
@@ -83,30 +61,41 @@ export function usePerfil() {
             if (janela === "nome") {
                 await atualizarUsuario(await usuarioService.alterarNome(nome.trim()));
                 toastSucesso("Nome atualizado!");
-            } else if (janela === "senha") {
+            } else {
                 await usuarioService.alterarSenha(senhaAtual, novaSenha);
                 toastSucesso("Senha trocada!");
             }
-            fechar();
+            setJanela(null);
         } catch (e) {
-            // ex.: "Senha atual incorreta." (a mensagem vem pronta da API)
             setErro(mensagemDeErro(e));
         } finally {
             setSalvando(false);
         }
     }
 
-    // ---------- excluir conta ----------
-    async function excluirConta() {
-        setExcluindo(true);
-        try {
-            await usuarioService.excluirConta();
-            await sair(); // apaga a sessão e volta para o Login
-            toastSucesso("Sua conta foi excluída.");
-        } catch (e) {
-            toastErro(mensagemDeErro(e));
-            setExcluindo(false);
-        }
+    function pedirSaida() {
+        Alert.alert("Sair da conta", "Tem certeza que deseja sair?", [
+            { text: "Cancelar", style: "cancel" },
+            { text: "Sair", style: "destructive", onPress: sair },
+        ]);
+    }
+
+    function excluirConta() {
+        confirmarExclusao({
+            titulo: "Excluir minha conta",
+            mensagem: "Seus locais e compromissos também serão apagados.",
+            aoConfirmar: async () => {
+                setExcluindo(true);
+                try {
+                    await usuarioService.excluirConta();
+                    await sair();
+                    toastSucesso("Sua conta foi excluída.");
+                } catch (e) {
+                    toastErro(mensagemDeErro(e));
+                    setExcluindo(false);
+                }
+            },
+        });
     }
 
     return {
@@ -125,10 +114,11 @@ export function usePerfil() {
             confirmacao,
             setConfirmacao,
         },
-        abrirNome,
-        abrirSenha,
-        fechar,
+        abrirNome: () => abrir("nome"),
+        abrirSenha: () => abrir("senha"),
+        fechar: () => setJanela(null),
         salvar,
+        pedirSaida,
         excluirConta,
     };
 }

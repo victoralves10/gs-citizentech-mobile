@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Alerta } from "../models/Previsao";
 import { corDaGravidade, iconeDoAlerta } from "../utils/clima";
@@ -6,25 +6,29 @@ import { dataCurta } from "../utils/formatar";
 import { useTema } from "../theme/TemaContext";
 import { Cores, transparente } from "../theme/cores";
 
+// Cartão colorido de um alerta (cor pela gravidade, ícone pelo tipo)
 type Props = {
     alerta: Alerta;
     mostrarDia?: boolean;
-    local?: string; // apelido do local, quando a tela mistura locais (aba Alertas)
+    local?: string; // apelido, quando a tela mistura locais (aba Alertas)
+    onPress?: () => void;
 };
 
-export default function CartaoAlerta({ alerta, mostrarDia = false, local }: Props) {
+export default function CartaoAlerta({ alerta, mostrarDia = false, local, onPress }: Props) {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
 
     const cor = corDaGravidade(alerta.gravidade, cores);
 
-    // em cima do texto: "Casa · Hoje", só "Hoje" ou nada
+    // "Casa · Hoje", só "Hoje" ou nada
     const detalhes = [local, mostrarDia ? dataCurta(alerta.dia) : undefined]
         .filter(Boolean)
         .join(" · ");
 
     return (
-        <View
+        <Pressable
+            onPress={onPress}
+            disabled={!onPress}
             style={[
                 estilos.cartao,
                 { borderLeftColor: cor, backgroundColor: transparente(cor, 0.1) },
@@ -38,7 +42,7 @@ export default function CartaoAlerta({ alerta, mostrarDia = false, local }: Prop
                 <Text style={estilos.titulo}>{alerta.titulo}</Text>
                 <Text style={estilos.descricao}>{alerta.descricao}</Text>
             </View>
-        </View>
+        </Pressable>
     );
 }
 
@@ -50,7 +54,7 @@ function criarEstilos(cores: Cores) {
             gap: 12,
             padding: 14,
             borderRadius: 16,
-            borderLeftWidth: 5, // a faixa colorida da esquerda
+            borderLeftWidth: 5,
         },
         icone: {
             width: 40,

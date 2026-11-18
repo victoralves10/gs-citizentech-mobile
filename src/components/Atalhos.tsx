@@ -1,5 +1,4 @@
-// Fileira de botões de atalho (ícone + texto) que levam para outras áreas do app.
-// Ex.: na Home, "Locais", "Pesquisar", "Agenda" e "Alertas".
+// Fileira de botões de atalho (ícone + texto)
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTema } from "../theme/TemaContext";

@@ -1,0 +1,78 @@
+# GaroAvisa (Mobile)
+
+App da Global Solution 2026/2 (CitizenTech). Mostra o clima dos lugares que importam
+para o cidadão (casa, trabalho, escola), avisa quando o tempo pede atenção e junta a
+previsão aos compromissos marcados em cada lugar.
+
+O app só mostra informações: toda a regra de negócio fica na API Java
+(<https://garoavisa-api.onrender.com>).
+
+## Funcionalidades
+
+- Cadastro, login e logout com JWT (telas protegidas só aparecem com login)
+- Home com o clima do local principal, alertas de hoje, dicas, próximas horas e o que mudou
+- Meus Locais: CRUD de locais com busca, paginação, local principal e alertas liga/desliga
+- Detalhes do local: previsão de 48 horas e 16 dias, alertas e compromissos do local
+- Compromissos: CRUD com calendário e a previsão do dia de cada compromisso
+- Pesquisa: previsão de qualquer lugar sem precisar salvar
+- Alertas: alertas e mudanças de todos os locais com alertas ligados
+- Perfil: trocar nome e senha, tema claro/escuro e excluir conta
+- Sobre o App: versão, hash do commit e data do build
+
+Exclusões (local, compromisso, conta e buscas recentes) pedem confirmação dupla.
+
+## Tecnologias
+
+React Native, Expo SDK 58, TypeScript, React Navigation, Axios, AsyncStorage,
+react-native-calendars, react-native-toast-message, ESLint e Prettier.
+
+## Como rodar
+
+```bash
+npm install
+npx expo start
+```
+
+Abra no Expo Go (Android ou iPhone) lendo o QR Code.
+
+Conferir o código:
+
+```bash
+npm run format && npm run lint && npm run typecheck
+```
+
+## Estrutura
+
+```
+src/
+  components/   peças visuais reaproveitadas pelas telas
+  config/       números usados em mais de um lugar
+  context/      sessão do usuário e apresentação
+  data/         textos da apresentação
+  hooks/        lógica das telas (estado, chamadas à API, validação)
+  models/       formato dos dados da API
+  navigation/   pilha + abas e o nome de cada tela
+  screens/      telas (só desenham)
+  services/     chamadas HTTP (API Java e Open-Meteo)
+  storage/      o que fica salvo no celular
+  theme/        cores e tema claro/escuro
+  utils/        formatação, datas, ícones, validação e confirmação
+```
+
+Fluxo: tela → hook → service → API.
+
+## Publicação
+
+O app está no Firebase App Distribution. A tela Sobre o App mostra o hash do commit
+usado no build.
+
+## Vídeo
+
+Link do vídeo: _(adicionar)_
+
+## Equipe
+
+- Eduardo Batista Locaspi (RM561713)
+- Enzo Vieira Bernardini (RM563000)
+- Liana Lyumi Morisita Fujisima (RM565698)
+- Victor Alves Lopes (RM561833)

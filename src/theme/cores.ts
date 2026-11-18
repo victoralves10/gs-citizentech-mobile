@@ -1,32 +1,27 @@
 export type Cores = {
-    // fundos
     fundo: string; // fundo da tela
     superficie: string; // fundo dos cartões e campos
     borda: string; // linhas e contornos
 
-    // textos
     texto: string; // texto principal
     textoSecundario: string; // texto de apoio (descrições)
     textoSuave: string; // dicas, placeholders
     textoSobreCor: string; // texto em cima de um botão colorido
 
-    // cores da marca
     primaria: string; // cor principal (botões, destaques)
     primariaForte: string; // versão mais escura da principal (gradiente)
     secundaria: string; // cor de apoio
 
-    // cores de aviso
     sucesso: string;
     erro: string;
     alerta: string;
 
-    // cores de apoio
     alertaTexto: string; // texto em cima de um fundo amarelo (o amarelo puro fica ilegível)
     secundariaTexto: string; // texto em cima de um fundo da cor secundária
     fundoSegmentado: string; // fundo da barrinha de opções (Automático / Claro / Escuro)
 };
 
-// Tema claro (tons de céu de dia)
+// Tema claro
 export const coresClaras: Cores = {
     fundo: "#F2F6FB",
     superficie: "#FFFFFF",
@@ -50,7 +45,7 @@ export const coresClaras: Cores = {
     fundoSegmentado: "#E3EAF3",
 };
 
-// Tema escuro (tons de céu de noite)
+// Tema escuro
 export const coresEscuras: Cores = {
     fundo: "#0B1220",
     superficie: "#152033",
@@ -75,7 +70,6 @@ export const coresEscuras: Cores = {
 };
 
 export function transparente(cor: string, opacidade: number) {
-    // 0.12 → 31 (de 0 a 255) → "1f" (em hexadecimal, com 2 dígitos)
     const alfa = Math.round(opacidade * 255)
         .toString(16)
         .padStart(2, "0");

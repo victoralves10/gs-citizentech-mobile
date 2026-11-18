@@ -1,15 +1,15 @@
-// Campo de data que abre um calendário (react-native-calendars), igual ao do Clyvo.
-// Guarda a data no formato da API ("2026-11-25") e bloqueia os dias que já passaram.
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Calendar, LocaleConfig } from "react-native-calendars";
-import { proximosDias } from "../utils/campoData";
-import { dataCurta, diaDeHoje, diaSemana } from "../utils/formatar";
+import Chip from "./Chip";
+import { diaDeHoje, proximosDias } from "../utils/datas";
+import { dataCurta, diaSemana } from "../utils/formatar";
 import { useTema } from "../theme/TemaContext";
-import { Cores, transparente } from "../theme/cores";
+import { Cores } from "../theme/cores";
 
-// calendário em português
+// Campo de data com calendário e atalhos dos próximos 7 dias (dias passados bloqueados)
+
 LocaleConfig.locales["pt-br"] = {
     monthNames: [
         "Janeiro",
@@ -47,7 +47,7 @@ LocaleConfig.defaultLocale = "pt-br";
 
 type Props = {
     rotulo: string;
-    valor: string; // "2026-11-25" ou "" (nenhuma escolhida)
+    valor: string; // "2026-11-25" ou ""
     onMudar: (valor: string) => void;
 };
 
@@ -65,7 +65,6 @@ export default function SeletorData({ rotulo, valor, onMudar }: Props) {
         <View style={estilos.bloco}>
             <Text style={estilos.rotulo}>{rotulo}</Text>
 
-            {/* o campo: mostra a data escolhida e abre/fecha o calendário */}
             <Pressable
                 style={[estilos.campo, aberto && estilos.campoAberto]}
                 onPress={() => setAberto(!aberto)}
@@ -83,36 +82,9 @@ export default function SeletorData({ rotulo, valor, onMudar }: Props) {
                 />
             </Pressable>
 
-            {/* atalhos: os próximos 7 dias (somem com o calendário aberto) */}
-            {!aberto && (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <View style={estilos.atalhos}>
-                        {proximosDias(7).map((dia, indice) => {
-                            const ativo = valor === dia;
-                            return (
-                                <Pressable
-                                    key={dia}
-                                    onPress={() => escolher(dia)}
-                                    style={[estilos.atalho, ativo && estilos.atalhoAtivo]}
-                                >
-                                    <Text style={[estilos.dia, ativo && estilos.textoAtivo]}>
-                                        {indice === 1 ? "Amanhã" : diaSemana(dia)}
-                                    </Text>
-                                    <Text style={[estilos.data, ativo && estilos.textoAtivo]}>
-                                        {dia.slice(8, 10)}/{dia.slice(5, 7)}
-                                    </Text>
-                                </Pressable>
-                            );
-                        })}
-                    </View>
-                </ScrollView>
-            )}
-
-            {/* o calendário (dias passados ficam apagados) */}
-            {aberto && (
+            {aberto ? (
                 <Calendar
-                    // a key recria o calendário quando o tema muda (claro/escuro)
-                    key={cores.fundo}
+                    key={cores.fundo} // recria ao trocar o tema
                     current={valor || undefined}
                     minDate={diaDeHoje()}
                     markedDates={
@@ -131,6 +103,20 @@ export default function SeletorData({ rotulo, valor, onMudar }: Props) {
                         selectedDayTextColor: cores.textoSobreCor,
                     }}
                 />
+            ) : (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <View style={estilos.atalhos}>
+                        {proximosDias(7).map((dia, indice) => (
+                            <Chip
+                                key={dia}
+                                texto={indice === 1 ? "Amanhã" : diaSemana(dia)}
+                                subtexto={`${dia.slice(8, 10)}/${dia.slice(5, 7)}`}
+                                ativo={valor === dia}
+                                onPress={() => escolher(dia)}
+                            />
+                        ))}
+                    </View>
+                </ScrollView>
             )}
         </View>
     );
@@ -171,31 +157,6 @@ function criarEstilos(cores: Cores) {
         atalhos: {
             flexDirection: "row",
             gap: 8,
-        },
-        atalho: {
-            alignItems: "center",
-            paddingHorizontal: 12,
-            paddingVertical: 8,
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: cores.borda,
-            backgroundColor: cores.superficie,
-        },
-        atalhoAtivo: {
-            borderColor: cores.primaria,
-            backgroundColor: transparente(cores.primaria, 0.12),
-        },
-        dia: {
-            fontSize: 13,
-            fontWeight: "700",
-            color: cores.texto,
-        },
-        data: {
-            fontSize: 12,
-            color: cores.textoSecundario,
-        },
-        textoAtivo: {
-            color: cores.primaria,
         },
         calendario: {
             borderRadius: 14,

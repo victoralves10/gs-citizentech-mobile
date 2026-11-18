@@ -1,3 +1,4 @@
+// Lugar encontrado na busca por nome (Open-Meteo)
 export type Lugar = {
     id: number; // id do lugar na busca (não é o id do local salvo)
     nome: string; // "Pinheiros"

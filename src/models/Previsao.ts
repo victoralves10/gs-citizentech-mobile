@@ -1,10 +1,7 @@
 import { Compromisso } from "./Compromisso";
 
-// ---------------------------------------------------------------------------
-// TIPOS FIXOS (a API manda sempre um destes textos)
-// ---------------------------------------------------------------------------
+// Tipos fixos
 
-// como está o céu (o app usa para escolher o ícone)
 export type CategoriaClima =
     | "CEU_LIMPO"
     | "PARCIALMENTE_NUBLADO"
@@ -16,24 +13,17 @@ export type CategoriaClima =
     | "TEMPESTADE"
     | "DESCONHECIDA";
 
-// os 6 tipos de alerta (o app usa para escolher o ícone)
 export type TipoAlerta = "CHUVA" | "TEMPESTADE" | "CALOR" | "FRIO" | "RAJADA" | "UV";
 
-// gravidade do alerta (o app usa para escolher a cor)
 export type GravidadeAlerta = "MEDIA" | "ALTA";
 
-// as 5 dicas do dia (o app usa para escolher o ícone)
 export type TipoDica =
     "GUARDA_CHUVA" | "PROTETOR_SOLAR" | "OCULOS_ESCUROS" | "CASACO" | "GARRAFA_AGUA";
 
-// o que fez a previsão mudar ("O que mudou")
 export type MotivoMudanca = "ALERTA" | "CEU" | "CHUVA" | "TEMPERATURA";
 
-// ---------------------------------------------------------------------------
-// PEDAÇOS DA PREVISÃO
-// ---------------------------------------------------------------------------
+// Partes da previsão
 
-// o local da previsão (resumido)
 export type LocalResumo = {
     id: number;
     apelido: string; // "Casa"
@@ -44,13 +34,12 @@ export type LocalResumo = {
     fuso: string; // "America/Sao_Paulo"
 };
 
-// um valor com a classificação pronta (ex.: UV 9 "Muito alto")
+// valor + classificação pronta (UV 9 "Muito alto")
 export type Medida = {
     valor: number | null;
     descricao: string | null;
 };
 
-// o clima de agora
 export type ClimaAtual = {
     temperatura: number | null;
     condicao: string | null; // texto pronto: "Parcialmente nublado"
@@ -67,7 +56,6 @@ export type ClimaAtual = {
     sol: { nascer: string | null; por: string | null } | null; // "2026-11-17T05:12"
 };
 
-// uma hora da previsão (lista "próximas horas")
 export type PrevisaoHora = {
     hora: string; // "2026-11-17T14:00"
     temperatura: number | null;
@@ -76,7 +64,6 @@ export type PrevisaoHora = {
     ehDia: boolean | null;
 };
 
-// um dia da previsão (lista "próximos dias")
 export type PrevisaoDia = {
     data: string; // "2026-11-18"
     temperaturaMinima: number | null;
@@ -88,7 +75,6 @@ export type PrevisaoDia = {
     previsaoIncerta: boolean | null; // dias muito distantes
 };
 
-// um card de alerta (título e descrição já vêm prontos da API)
 export type Alerta = {
     id: number | null; // null na Pesquisa (alerta calculado na hora)
     tipo: TipoAlerta;
@@ -100,7 +86,6 @@ export type Alerta = {
     primeiraHora: number | null;
 };
 
-// um chip de dica (o texto já vem pronto da API)
 export type Dica = {
     tipo: TipoDica;
     texto: string; // "Leve guarda-chuva"
@@ -121,9 +106,7 @@ export type Mudanca = {
     gravidadeAlerta: GravidadeAlerta | null;
 };
 
-// ---------------------------------------------------------------------------
-// RESPOSTAS DAS TELAS
-// ---------------------------------------------------------------------------
+// Respostas
 
 // GET /home
 export type RespostaHome = {

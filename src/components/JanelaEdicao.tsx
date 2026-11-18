@@ -5,6 +5,7 @@ import Botao from "./Botao";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
+// Janela que sobe de baixo com campos e os botões Cancelar/Salvar
 type Props = {
     visivel: boolean;
     titulo: string;
@@ -29,19 +30,16 @@ export default function JanelaEdicao({
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
 
-    // espaço da barra de gestos do celular (para os botões não ficarem embaixo dela)
     const { bottom } = useSafeAreaInsets();
 
     return (
         <Modal
             visible={visivel}
-            transparent // deixa ver a tela de trás (escurecida)
-            animationType="slide" // sobe de baixo
+            transparent
+            animationType="slide"
             onRequestClose={onFechar} // botão "voltar" do Android
         >
-            {/* empurra a gaveta para cima quando o teclado abre */}
             <KeyboardAvoidingView style={estilos.fundo} behavior="padding">
-                {/* tocar fora da gaveta fecha (menos enquanto salva) */}
                 <Pressable style={estilos.areaFora} onPress={salvando ? undefined : onFechar} />
 
                 <View style={[estilos.gaveta, { paddingBottom: 20 + bottom }]}>
@@ -75,7 +73,7 @@ function criarEstilos(cores: Cores) {
     return StyleSheet.create({
         fundo: {
             flex: 1,
-            justifyContent: "flex-end", // gaveta grudada embaixo
+            justifyContent: "flex-end",
             backgroundColor: "rgba(0, 0, 0, 0.45)",
         },
         areaFora: {

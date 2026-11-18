@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
+// Título grande da tela, com texto acima/abaixo e algo à direita
 type Props = {
     titulo: string;
     subtitulo?: string;
@@ -16,7 +17,6 @@ export default function CabecalhoTela({ titulo, subtitulo, acima, direita }: Pro
 
     return (
         <View style={estilos.linha}>
-            {/* textos: flex 1 = ocupam o espaço que sobrar */}
             <View style={estilos.textos}>
                 {acima && <Text style={estilos.acima}>{acima}</Text>}
                 <Text style={estilos.titulo} numberOfLines={1}>

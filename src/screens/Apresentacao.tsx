@@ -20,6 +20,7 @@ import { useApresentacao } from "../context/ApresentacaoContext";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
+// Apresentação da 1ª abertura (também abre pelo Perfil)
 export default function Apresentacao() {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
@@ -27,41 +28,33 @@ export default function Apresentacao() {
     const navigation = useNavigation();
     const { concluirApresentacao } = useApresentacao();
 
-    // largura da tela: cada página ocupa exatamente uma tela de largura
     const { width: largura } = useWindowDimensions();
 
-    // altura do espaço das páginas (medida quando a tela aparece, no onLayout)
     const [alturaPaginas, setAlturaPaginas] = useState(0);
 
-    // em qual página está (0 = primeira)
     const [pagina, setPagina] = useState(0);
     const ultima = pagina === PAGINAS_APRESENTACAO.length - 1;
 
-    // referência para a lista: permite "rolar por código" quando toca na seta
     const lista = useRef<FlatList>(null);
 
-    // quando o dedo solta e a rolagem para, descobre em qual página parou
     function aoTerminarDeRolar(evento: NativeSyntheticEvent<NativeScrollEvent>) {
         const posicao = evento.nativeEvent.contentOffset.x;
         setPagina(Math.round(posicao / largura));
     }
 
-    // seta: vai para a próxima página
     function proxima() {
         const seguinte = pagina + 1;
         lista.current?.scrollToIndex({ index: seguinte, animated: true });
         setPagina(seguinte);
     }
 
-    // "Começar" ou "Pular"
     async function concluir() {
-        // veio do Perfil? (dá para voltar) — guarda ANTES de concluir
+        // veio do Perfil? (guarda antes de concluir)
         const veioDoPerfil = navigation.canGoBack();
 
         await concluirApresentacao();
 
-        // do Perfil: volta. Na primeira abertura não precisa fazer nada:
-        // a navegação tira esta tela da lista e mostra o Login sozinha.
+        // na 1ª abertura a navegação já troca para o Login
         if (veioDoPerfil) {
             navigation.goBack();
         }
@@ -69,10 +62,8 @@ export default function Apresentacao() {
 
     return (
         <SafeAreaView style={estilos.tela} edges={["top", "bottom"]}>
-            {/* ---------- TOPO ---------- */}
             <View style={estilos.topo}>
                 <Marca variante="compacta" />
-                {/* o "Pular" some na última página (lá já tem o "Começar") */}
                 {!ultima && (
                     <Pressable onPress={concluir} hitSlop={12}>
                         <Text style={estilos.pular}>Pular</Text>
@@ -80,8 +71,6 @@ export default function Apresentacao() {
                 )}
             </View>
 
-            {/* ---------- PÁGINAS ---------- */}
-            {/* a View mede o espaço livre (onLayout) e cada página usa essa altura */}
             <View
                 style={estilos.areaPaginas}
                 onLayout={(evento) => setAlturaPaginas(evento.nativeEvent.layout.height)}
@@ -93,12 +82,11 @@ export default function Apresentacao() {
                     renderItem={({ item }) => (
                         <SlideApresentacao pagina={item} largura={largura} altura={alturaPaginas} />
                     )}
-                    horizontal // lista de lado, em vez de para baixo
-                    pagingEnabled // para sempre "certinho" numa página
+                    horizontal
+                    pagingEnabled
                     showsHorizontalScrollIndicator={false}
                     bounces={false}
                     onMomentumScrollEnd={aoTerminarDeRolar}
-                    // diz à lista o tamanho de cada página (necessário para o scrollToIndex)
                     getItemLayout={(_, indice) => ({
                         length: largura,
                         offset: largura * indice,
@@ -107,7 +95,6 @@ export default function Apresentacao() {
                 />
             </View>
 
-            {/* ---------- RODAPÉ: bolinhas + seta / Começar ---------- */}
             <View style={estilos.rodape}>
                 <View style={estilos.bolinhas}>
                     {PAGINAS_APRESENTACAO.map((item, indice) => (
@@ -123,7 +110,6 @@ export default function Apresentacao() {
                         colors={[cores.primaria, cores.primariaForte]}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
-                        // na última página, o botão redondo vira uma pílula com texto
                         style={[estilos.botao, ultima && estilos.botaoComecar]}
                     >
                         {ultima && <Text style={estilos.textoComecar}>Começar</Text>}
@@ -149,7 +135,7 @@ function criarEstilos(cores: Cores) {
             paddingTop: 8,
         },
         areaPaginas: {
-            flex: 1, // ocupa todo o espaço entre o topo e o rodapé
+            flex: 1,
         },
         pular: {
             fontSize: 15,

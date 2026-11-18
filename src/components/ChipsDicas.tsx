@@ -5,6 +5,7 @@ import { iconeDaDica } from "../utils/clima";
 import { useTema } from "../theme/TemaContext";
 import { Cores, transparente } from "../theme/cores";
 
+// Dicas do dia em pílulas (guarda-chuva, protetor...)
 type Props = {
     dicas: Dica[];
 };
@@ -33,7 +34,7 @@ function criarEstilos(cores: Cores) {
     return StyleSheet.create({
         chips: {
             flexDirection: "row",
-            flexWrap: "wrap", // se não couber, desce para a próxima linha
+            flexWrap: "wrap",
             gap: 8,
         },
         chip: {

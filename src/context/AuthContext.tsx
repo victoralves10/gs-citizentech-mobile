@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { Usuario } from "../models/Usuario";
-import { authService } from "../services/auth/authService";
+import { authService } from "../services/authService";
 import { aoExpirarSessao } from "../services/api";
 import { apagarSessao, buscarSessao, salvarSessao } from "../storage/sessaoStorage";
 import { log } from "../utils/log";
@@ -18,11 +18,12 @@ type AuthContextDados = {
 
 const AuthContext = createContext<AuthContextDados | null>(null);
 
+// Sessão do usuário: entrar, cadastrar, sair
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [usuario, setUsuario] = useState<Usuario | null>(null);
     const [carregando, setCarregando] = useState(true);
 
-    // quando o app abre: confere se ficou uma sessão salva
+    // abre o app com a sessão salva
     useEffect(() => {
         buscarSessao().then((sessao) => {
             if (sessao) {
@@ -35,8 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
     }, []);
 
-    // token vencido (erro 401 em qualquer tela): sai da conta e avisa.
-    // O "jaAvisou" evita 3 avisos iguais quando 3 requisições dão 401 juntas.
+    // sessão vencida (401): sai e avisa uma vez só
     const jaAvisou = useRef(false);
 
     useEffect(() => {
@@ -51,8 +51,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
     }, []);
 
-    // login: chama o authService, salva a sessão no celular e entra no app.
-    // Se der erro (ex.: senha errada), o erro "sobe" para a tela mostrar o toast.
     async function entrar(email: string, senha: string) {
         const sessao = await authService.entrar(email, senha);
         await salvarSessao(sessao);
@@ -61,7 +59,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         log.sessao(`login feito (${sessao.usuario.email})`);
     }
 
-    // cadastro: igual ao login, mas cria a conta antes
     async function cadastrar(nome: string, email: string, senha: string) {
         const sessao = await authService.cadastrar(nome, email, senha);
         await salvarSessao(sessao);
@@ -70,14 +67,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         log.sessao(`cadastro feito (${sessao.usuario.email})`);
     }
 
-    // logout: apaga a sessão do celular e volta para o Login
     async function sair() {
         await apagarSessao();
         setUsuario(null);
         log.sessao("logout feito");
     }
 
-    // troca os dados do usuário guardados (o token continua o mesmo)
     async function atualizarUsuario(novo: Usuario) {
         const sessao = await buscarSessao();
         if (sessao) {
@@ -86,7 +81,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUsuario(novo);
     }
 
-    // logado é true quando existe um usuário
     const logado = usuario !== null;
 
     return (

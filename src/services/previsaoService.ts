@@ -1,5 +1,6 @@
-import { api } from "../api";
-import { RespostaHome, RespostaPesquisa, RespostaPrevisao } from "../../models/Previsao";
+// Previsão na API Java (Home, Detalhes e Pesquisa)
+import { api } from "./api";
+import { RespostaHome, RespostaPesquisa, RespostaPrevisao } from "../models/Previsao";
 
 async function home(): Promise<RespostaHome> {
     const resposta = await api.get<RespostaHome>("/home");
@@ -22,4 +23,4 @@ async function pesquisar(
     return resposta.data;
 }
 
-export const previsaoApi = { home, doLocal, pesquisar };
+export const previsaoService = { home, doLocal, pesquisar };

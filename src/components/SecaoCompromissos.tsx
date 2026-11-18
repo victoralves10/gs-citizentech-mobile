@@ -1,13 +1,10 @@
-// Lista os próximos compromissos e permite criar, editar e excluir.
-// Na linha aparece um resumo da previsão do dia; no menu, a previsão completa.
-// A lógica fica no hook useCompromissosLocal, criado na tela de Detalhes
-// (assim o atalho "Novo evento" do topo também abre a janela).
 import { useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Cartao from "./Cartao";
 import ItemLista from "./ItemLista";
 import TituloSecao from "./TituloSecao";
+import AvisoLinha from "./AvisoLinha";
 import JanelaEdicao from "./JanelaEdicao";
 import CampoTexto from "./CampoTexto";
 import MenuOpcoes from "./MenuOpcoes";
@@ -21,25 +18,25 @@ import { dataCurta, porcentagem, temperatura } from "../utils/formatar";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
+// Compromissos do local com a previsão de cada dia (lógica no useCompromissosLocal)
 type Props = {
-    c: CompromissosDoLocal; // o que o hook useCompromissosLocal devolve
-    dias?: PrevisaoDia[]; // previsão de 16 dias do local (vem da API nos Detalhes)
-    alertas?: Alerta[]; // alertas do local (hoje e próximos dias)
+    c: CompromissosDoLocal;
+    dias?: PrevisaoDia[];
+    alertas?: Alerta[];
 };
 
 export default function SecaoCompromissos({ c, dias = [], alertas = [] }: Props) {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
 
-    // compromisso em que o usuário tocou (abre o menu com a previsão, Editar e Excluir)
+    // compromisso tocado: abre o menu com a previsão, Editar e Excluir
     const [selecionado, setSelecionado] = useState<Compromisso | null>(null);
 
-    // a previsão do dia de um compromisso (ou undefined se estiver fora dos 16 dias)
+    // previsão do dia (undefined se estiver fora dos 16 dias)
     function diaDo(compromisso: Compromisso) {
         return dias.find((d) => d.data === compromisso.data.slice(0, 10));
     }
 
-    // resumo na direita da linha: ícone, mín/máx e chance de chuva
     function resumo(compromisso: Compromisso) {
         const dia = diaDo(compromisso);
         if (!dia) return undefined;
@@ -52,13 +49,6 @@ export default function SecaoCompromissos({ c, dias = [], alertas = [] }: Props)
                 <Text style={estilos.chuva}>{porcentagem(dia.probabilidadeChuva)}</Text>
             </View>
         );
-    }
-
-    function confirmarExclusao(compromisso: Compromisso) {
-        Alert.alert(`Excluir "${compromisso.nome}"?`, "Isso não pode ser desfeito.", [
-            { text: "Cancelar", style: "cancel" },
-            { text: "Excluir", style: "destructive", onPress: () => c.excluir(compromisso) },
-        ]);
     }
 
     return (
@@ -84,16 +74,16 @@ export default function SecaoCompromissos({ c, dias = [], alertas = [] }: Props)
                     ))}
                 </Cartao>
             ) : (
-                <Cartao>
-                    <Text style={estilos.vazio}>
-                        {c.carregando
+                <AvisoLinha
+                    icone="calendar-outline"
+                    texto={
+                        c.carregando
                             ? "Carregando..."
-                            : "Nenhum compromisso marcado aqui. Toque em + Novo."}
-                    </Text>
-                </Cartao>
+                            : "Nenhum compromisso marcado aqui. Toque em + Novo."
+                    }
+                />
             )}
 
-            {/* ---------- menu: previsão do dia + editar ou excluir ---------- */}
             <MenuOpcoes
                 visivel={selecionado !== null}
                 titulo={selecionado?.nome ?? ""}
@@ -109,7 +99,7 @@ export default function SecaoCompromissos({ c, dias = [], alertas = [] }: Props)
                         titulo: "Excluir",
                         icone: "trash-outline",
                         perigo: true,
-                        onPress: () => selecionado && confirmarExclusao(selecionado),
+                        onPress: () => selecionado && c.excluir(selecionado),
                     },
                 ]}
             >
@@ -121,7 +111,6 @@ export default function SecaoCompromissos({ c, dias = [], alertas = [] }: Props)
                 )}
             </MenuOpcoes>
 
-            {/* ---------- janela de criar / editar ---------- */}
             <JanelaEdicao
                 visivel={c.aberta}
                 titulo={c.editando ? "Editar compromisso" : "Novo compromisso"}
@@ -146,10 +135,6 @@ export default function SecaoCompromissos({ c, dias = [], alertas = [] }: Props)
 
 function criarEstilos(cores: Cores) {
     return StyleSheet.create({
-        vazio: {
-            fontSize: 14,
-            color: cores.textoSecundario,
-        },
         resumo: {
             flexDirection: "row",
             alignItems: "center",

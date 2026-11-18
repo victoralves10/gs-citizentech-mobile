@@ -1,52 +1,30 @@
-// Lista, cria, edita e exclui os compromissos de um local (usado nos Detalhes).
-// A mesma janela serve para criar e editar: com "editando" faz PUT, sem faz POST.
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Compromisso } from "../models/Compromisso";
-import { compromissosService } from "../services/compromissos/compromissosService";
+import { compromissosService } from "../services/compromissosService";
 import { mensagemDeErro } from "../services/api";
+import { confirmarExclusao } from "../utils/confirmar";
 import { toastErro, toastSucesso } from "../utils/toast";
+import { useCarregar } from "./useCarregar";
 
+// Compromissos de um local: listar, criar, editar e excluir.
+// A mesma janela cria (POST) e edita (PUT).
 export function useCompromissosLocal(localId: number) {
-    const [lista, setLista] = useState<Compromisso[]>([]);
-    const [carregando, setCarregando] = useState(true);
+    const { dados, carregando, recarregar } = useCarregar(() =>
+        compromissosService.doLocal(localId)
+    );
 
     // janela de criar/editar
     const [aberta, setAberta] = useState(false);
     const [editando, setEditando] = useState<Compromisso | null>(null);
     const [nome, setNome] = useState("");
-    const [data, setData] = useState(""); // formato da API: "2026-11-25"
+    const [data, setData] = useState(""); // "2026-11-25"
     const [erro, setErro] = useState<string>();
     const [salvando, setSalvando] = useState(false);
 
-    // busca a lista (quando a tela abre e depois de cada mudança)
-    function recarregar() {
-        return compromissosService
-            .doLocal(localId)
-            .then(setLista)
-            .catch(() => setLista([]))
-            .finally(() => setCarregando(false));
-    }
-
-    useEffect(() => {
-        compromissosService
-            .doLocal(localId)
-            .then(setLista)
-            .catch(() => setLista([]))
-            .finally(() => setCarregando(false));
-    }, [localId]);
-
-    function abrirNovo() {
-        setEditando(null);
-        setNome("");
-        setData("");
-        setErro(undefined);
-        setAberta(true);
-    }
-
-    function abrirEdicao(compromisso: Compromisso) {
+    function abrir(compromisso: Compromisso | null) {
         setEditando(compromisso);
-        setNome(compromisso.nome);
-        setData(compromisso.data.slice(0, 10)); // "2026-11-25T00:00:00" → "2026-11-25"
+        setNome(compromisso?.nome ?? "");
+        setData(compromisso?.data.slice(0, 10) ?? "");
         setErro(undefined);
         setAberta(true);
     }
@@ -59,11 +37,7 @@ export function useCompromissosLocal(localId: number) {
         setSalvando(true);
         try {
             if (editando) {
-                await compromissosService.editar(editando.id, {
-                    nome: nome.trim(),
-                    data,
-                    localId,
-                });
+                await compromissosService.editar(editando.id, { nome: nome.trim(), data, localId });
                 toastSucesso("Compromisso atualizado!");
             } else {
                 await compromissosService.criar(localId, { nome: nome.trim(), data });
@@ -72,25 +46,30 @@ export function useCompromissosLocal(localId: number) {
             setAberta(false);
             recarregar();
         } catch (e) {
-            // ex.: "A data do compromisso não pode estar no passado" (vem da API)
             setErro(mensagemDeErro(e));
         } finally {
             setSalvando(false);
         }
     }
 
-    async function excluir(compromisso: Compromisso) {
-        try {
-            await compromissosService.remover(compromisso.id);
-            toastSucesso("Compromisso excluído.");
-            recarregar();
-        } catch (e) {
-            toastErro(mensagemDeErro(e));
-        }
+    function excluir(compromisso: Compromisso) {
+        confirmarExclusao({
+            titulo: `Excluir "${compromisso.nome}"?`,
+            mensagem: "O compromisso será apagado.",
+            aoConfirmar: async () => {
+                try {
+                    await compromissosService.remover(compromisso.id);
+                    toastSucesso("Compromisso excluído.");
+                    recarregar();
+                } catch (e) {
+                    toastErro(mensagemDeErro(e));
+                }
+            },
+        });
     }
 
     return {
-        lista,
+        lista: dados ?? [],
         carregando,
         aberta,
         editando,
@@ -100,13 +79,12 @@ export function useCompromissosLocal(localId: number) {
         setData,
         erro,
         salvando,
-        abrirNovo,
-        abrirEdicao,
+        abrirNovo: () => abrir(null),
+        abrirEdicao: abrir,
         fechar: () => setAberta(false),
         salvar,
         excluir,
     };
 }
 
-// o tipo do que o hook devolve (a SecaoCompromissos recebe isso pronto)
 export type CompromissosDoLocal = ReturnType<typeof useCompromissosLocal>;

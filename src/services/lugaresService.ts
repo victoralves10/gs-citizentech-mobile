@@ -1,14 +1,13 @@
 import { create } from "axios";
-import { Lugar } from "../../models/Lugar";
+import { Lugar } from "../models/Lugar";
 
-// conexão só para a Open-Meteo (sem token)
+// Busca de lugares por nome na Open-Meteo (sem token)
 const openMeteo = create({
     baseURL: "https://geocoding-api.open-meteo.com/v1",
     timeout: 15000,
 });
 
-// o formato que a Open-Meteo devolve (só os campos que o app usa).
-// admin1 = estado, admin2 = cidade (no Brasil). Podem não vir.
+// admin1 = estado, admin2 = cidade
 type ResultadoOpenMeteo = {
     id: number;
     name: string;
@@ -21,18 +20,15 @@ type ResultadoOpenMeteo = {
     admin3?: string;
 };
 
-// a Open-Meteo devolve { results: [...] }. Quando não acha nada,
-// o "results" nem vem (por isso o "?" e o "?? []" lá embaixo).
+// sem resultados, o "results" não vem
 type RespostaOpenMeteo = {
     results?: ResultadoOpenMeteo[];
 };
 
-// texto vazio ("") conta como "não veio"
 function primeiroPreenchido(...textos: (string | undefined)[]): string {
     return textos.find((t) => t && t.trim())?.trim() ?? "";
 }
 
-// transforma o resultado da Open-Meteo no nosso Lugar
 function paraLugar(r: ResultadoOpenMeteo): Lugar {
     const pais = primeiroPreenchido(r.country, "Brasil");
     return {
@@ -54,4 +50,4 @@ async function buscar(texto: string): Promise<Lugar[]> {
     return (resposta.data.results ?? []).map(paraLugar);
 }
 
-export const lugaresApi = { buscar };
+export const lugaresService = { buscar };

@@ -5,6 +5,7 @@ import Botao from "../components/Botao";
 import TextoComLink from "../components/TextoComLink";
 import { useCadastro } from "../hooks/useCadastro";
 
+// Cadastro com a API (a lógica fica no useCadastro)
 export default function Cadastro() {
     const navigation = useNavigation();
 

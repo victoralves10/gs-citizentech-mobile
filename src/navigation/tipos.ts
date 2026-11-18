@@ -1,12 +1,13 @@
+// Nomes das telas e o que cada uma recebe
 import { Lugar } from "../models/Lugar";
 
 export type ListaDeTelas = {
-    // telas de fora (sem login)
+    // sem login
     Apresentacao: undefined; // boas-vindas da primeira abertura
     Login: undefined;
     Cadastro: undefined;
 
-    // abas de baixo (com login)
+    // abas
     Abas: undefined;
     Home: undefined;
     MeusLocais: undefined;
@@ -14,7 +15,7 @@ export type ListaDeTelas = {
     Alertas: undefined;
     Perfil: undefined;
 
-    // telas que abrem por cima das abas (com login)
+    // por cima das abas
     DetalhesLocal: { localId: number; apelido?: string }; // apelido = título da tela
     SobreApp: undefined;
     MeusCompromissos: undefined; // todos os compromissos, de todos os locais

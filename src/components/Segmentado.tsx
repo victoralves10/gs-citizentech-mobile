@@ -7,6 +7,7 @@ type Opcao<T extends string> = {
     rotulo: string; // o que o usuário lê ("Claro")
 };
 
+// Opções lado a lado em que só uma fica marcada
 type Props<T extends string> = {
     opcoes: Opcao<T>[];
     valor: T;
@@ -46,7 +47,7 @@ function criarEstilos(cores: Cores) {
             padding: 4,
         },
         opcao: {
-            flex: 1, // todas as opções com a mesma largura
+            flex: 1,
             alignItems: "center",
             paddingVertical: 9,
             borderRadius: 9,

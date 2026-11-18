@@ -7,11 +7,12 @@ import { LocalCard } from "../models/Local";
 import { useTema } from "../theme/TemaContext";
 import { Cores, transparente } from "../theme/cores";
 
+// Cartão de um local em Meus Locais (abrir, alertas e menu ⋮)
 type Props = {
     local: LocalCard;
-    onAbrir: () => void; // tocou no cartão
-    onAlertas: (ligar: boolean) => void; // tocou no interruptor (true = ligou)
-    onOpcoes: () => void; // tocou nos "⋮"
+    onAbrir: () => void;
+    onAlertas: (ligar: boolean) => void; // true = ligou
+    onOpcoes: () => void;
 };
 
 export default function CartaoLocal({ local, onAbrir, onAlertas, onOpcoes }: Props) {
@@ -20,9 +21,7 @@ export default function CartaoLocal({ local, onAbrir, onAlertas, onOpcoes }: Pro
 
     return (
         <Cartao semEspaco onPress={onAbrir}>
-            {/* ---------- parte de cima: ícone, nomes e ⋮ ---------- */}
             <View style={estilos.topo}>
-                {/* o principal ganha a casinha; os outros, o alfinete */}
                 <View style={[estilos.icone, local.principal && estilos.iconePrincipal]}>
                     <Ionicons
                         name={local.principal ? "home" : "location"}
@@ -48,7 +47,7 @@ export default function CartaoLocal({ local, onAbrir, onAlertas, onOpcoes }: Pro
                 </Pressable>
             </View>
 
-            {/* ---------- parte de baixo: interruptor de alertas ---------- */}
+            {/* Alertas */}
             <View style={estilos.rodape}>
                 <Ionicons
                     name={local.receberAlertas ? "notifications" : "notifications-off-outline"}

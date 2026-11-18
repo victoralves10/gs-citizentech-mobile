@@ -7,8 +7,9 @@ import { transparente } from "../theme/cores";
 
 type NomeIcone = keyof typeof Ionicons.glyphMap;
 
+// Ilustração animada das páginas da apresentação
 type Props = {
-    tamanho: number; // largura e altura da área (é sempre um quadrado)
+    tamanho: number;
     icone: NomeIcone;
     iconesExtras: [NomeIcone, NomeIcone, NomeIcone];
 };
@@ -16,20 +17,17 @@ type Props = {
 export default function IlustracaoClima({ tamanho, icone, iconesExtras }: Props) {
     const { cores } = useTema();
 
-    // ---------- animação de "flutuar" ----------
-    // useState com função cria o valor animado UMA vez só (não recria a cada desenho da tela).
-    // Os colchetes [flutuar] pegam só o valor (sem o "set": quem muda o valor é a animação).
+    // Animação de flutuar
     const [flutuar] = useState(() => new Animated.Value(0));
 
     useEffect(() => {
-        // loop: vai de 0 a 1 e volta, para sempre
         const animacao = Animated.loop(
             Animated.sequence([
                 Animated.timing(flutuar, {
                     toValue: 1,
                     duration: 1800,
                     easing: Easing.inOut(Easing.ease),
-                    useNativeDriver: true, // a animação roda no "lado nativo" (mais leve)
+                    useNativeDriver: true,
                 }),
                 Animated.timing(flutuar, {
                     toValue: 0,
@@ -40,21 +38,18 @@ export default function IlustracaoClima({ tamanho, icone, iconesExtras }: Props)
             ])
         );
         animacao.start();
-        return () => animacao.stop(); // para a animação quando a tela some
+        return () => animacao.stop();
     }, [flutuar]);
 
-    // 0 → 1 vira 0 → -8 (sobe 8 pixels)
     const deslocamento = flutuar.interpolate({ inputRange: [0, 1], outputRange: [0, -8] });
 
-    // ---------- medidas (tudo proporcional ao tamanho) ----------
+    // Medidas
     const anel = tamanho * 0.8;
     const centro = tamanho * 0.52;
     const bolinha = tamanho * 0.2;
 
-    // cor de cada bolinha pequena (azul, ciano e amarelo)
     const coresExtras = [cores.primaria, cores.secundaria, cores.alerta];
 
-    // posição de cada bolinha em volta (em cima à direita, à esquerda, embaixo à direita)
     const posicoes = [
         { top: tamanho * 0.06, right: tamanho * 0.1 },
         { top: tamanho * 0.44, left: 0 },
@@ -63,7 +58,6 @@ export default function IlustracaoClima({ tamanho, icone, iconesExtras }: Props)
 
     return (
         <View style={{ width: tamanho, height: tamanho }}>
-            {/* fundo: círculo bem clarinho do tamanho todo */}
             <View
                 style={[
                     estilos.circulo,
@@ -76,7 +70,6 @@ export default function IlustracaoClima({ tamanho, icone, iconesExtras }: Props)
                 ]}
             />
 
-            {/* anel do meio */}
             <View
                 style={[
                     estilos.circulo,
@@ -92,7 +85,6 @@ export default function IlustracaoClima({ tamanho, icone, iconesExtras }: Props)
                 ]}
             />
 
-            {/* círculo principal em degradê, flutuando */}
             <Animated.View
                 style={[
                     estilos.circulo,
@@ -116,7 +108,6 @@ export default function IlustracaoClima({ tamanho, icone, iconesExtras }: Props)
                 </LinearGradient>
             </Animated.View>
 
-            {/* as 3 bolinhas com ícones pequenos */}
             {iconesExtras.map((nome, indice) => (
                 <View
                     key={nome}
@@ -143,7 +134,7 @@ export default function IlustracaoClima({ tamanho, icone, iconesExtras }: Props)
 
 const estilos = StyleSheet.create({
     circulo: {
-        position: "absolute", // todas as formas ficam empilhadas no mesmo quadrado
+        position: "absolute",
     },
     centralizado: {
         alignItems: "center",

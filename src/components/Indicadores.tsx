@@ -5,6 +5,7 @@ import { horario, porcentagem, velocidade } from "../utils/formatar";
 import { useTema } from "../theme/TemaContext";
 import { Cores, transparente } from "../theme/cores";
 
+// Quadradinhos de umidade, vento, chuva, UV...
 type Props = {
     clima: ClimaAtual;
     completo?: boolean;
@@ -20,7 +21,7 @@ export default function Indicadores({ clima, completo = false }: Props) {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
 
-    // os 4 de sempre
+    // Sempre aparecem
     const lista: Indicador[] = [
         { icone: "water-outline", valor: porcentagem(clima.umidade), rotulo: "Umidade" },
         {
@@ -36,12 +37,11 @@ export default function Indicadores({ clima, completo = false }: Props) {
         {
             icone: "sunny-outline",
             valor: clima.indiceUV?.valor != null ? String(Math.round(clima.indiceUV.valor)) : "--",
-            // a classificação ("Muito alto") já vem pronta da API
             rotulo: clima.indiceUV?.descricao ? `UV ${clima.indiceUV.descricao}` : "Índice UV",
         },
     ];
 
-    // os extras da tela Detalhes
+    // Só nos Detalhes
     if (completo) {
         lista.push(
             {
@@ -79,7 +79,6 @@ function criarEstilos(cores: Cores) {
             gap: 10,
         },
         quadrado: {
-            // 2 por linha: metade da largura menos metade do espaço entre eles
             width: "48%",
             flexGrow: 1,
             flexDirection: "row",
@@ -108,7 +107,7 @@ function criarEstilos(cores: Cores) {
             color: cores.texto,
         },
         rotulo: {
-            flexShrink: 1, // deixa o texto quebrar a linha em vez de sumir
+            flexShrink: 1, // quebra a linha em vez de sumir
             fontSize: 12,
             color: cores.textoSecundario,
         },

@@ -1,21 +1,24 @@
-// Busca os próximos compromissos de todos os locais (GET /compromissos).
-// Atualiza toda vez que a tela aparece e ao puxar a tela para baixo.
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
-import { Compromisso } from "../models/Compromisso";
-import { compromissosService } from "../services/compromissos/compromissosService";
 import { mensagemDeErro } from "../services/api";
 
-export function useMeusCompromissos() {
-    const [lista, setLista] = useState<Compromisso[]>([]);
+// Busca dados da API sempre que a tela aparece.
+// Só a 1ª vez mostra a rodinha; depois atualiza sem apagar a tela.
+export function useCarregar<T>(buscar: () => Promise<T>) {
+    const [dados, setDados] = useState<T | null>(null);
     const [carregando, setCarregando] = useState(true);
     const [atualizando, setAtualizando] = useState(false);
     const [erro, setErro] = useState<string>();
 
+    const funcao = useRef(buscar);
+    useEffect(() => {
+        funcao.current = buscar;
+    });
+
     const carregar = useCallback(async (puxou: boolean) => {
         if (puxou) setAtualizando(true);
         try {
-            setLista(await compromissosService.todos());
+            setDados(await funcao.current());
             setErro(undefined);
         } catch (e) {
             setErro(mensagemDeErro(e));
@@ -31,5 +34,12 @@ export function useMeusCompromissos() {
         }, [carregar])
     );
 
-    return { lista, carregando, atualizando, erro, atualizar: () => carregar(true) };
+    return {
+        dados,
+        carregando,
+        atualizando,
+        erro,
+        atualizar: () => carregar(true), // puxar para atualizar
+        recarregar: () => carregar(false), // depois de salvar algo
+    };
 }

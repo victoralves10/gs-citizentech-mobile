@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
+// Campo de busca com lupa, rodinha e botão de limpar
 type Props = {
     valor: string;
     onMudar: (texto: string) => void;
@@ -28,7 +29,6 @@ export default function CampoBusca({ valor, onMudar, placeholder, buscando = fal
                 returnKeyType="search"
             />
 
-            {/* direita: rodinha (buscando) ou "x" (tem texto) */}
             {buscando ? (
                 <ActivityIndicator size="small" color={cores.primaria} />
             ) : (

@@ -1,19 +1,18 @@
-// Formato dos dados do usuário, iguais ao que a API Java devolve.
+// Usuário (igual à API Java)
 
-// um usuário do app (GET /usuarios/me)
 export type Usuario = {
     id: number;
     nome: string;
     email: string;
 };
 
-// o que o app guarda no celular depois do login/cadastro
+// guardado no celular depois do login
 export type RespostaSessao = {
-    token: string; // a "chave" que prova que o usuário está logado (JWT)
+    token: string;
     usuario: Usuario;
 };
 
-// o que o POST /auth/login e o POST /auth/cadastro devolvem
+// POST /auth/login e /auth/cadastro
 export type RespostaToken = {
     token: string;
     tipo: string; // "Bearer"

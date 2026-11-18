@@ -4,19 +4,22 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
+// Botão do app: principal (degradê) ou contorno; "pequeno" vira uma pílula
 type Props = {
     texto: string;
     onPress: () => void;
     variante?: "principal" | "contorno";
+    pequeno?: boolean;
     carregando?: boolean;
     desabilitado?: boolean;
-    icone?: keyof typeof Ionicons.glyphMap; // ícone opcional ao lado do texto
+    icone?: keyof typeof Ionicons.glyphMap;
 };
 
 export default function Botao({
     texto,
     onPress,
     variante = "principal",
+    pequeno = false,
     carregando = false,
     desabilitado = false,
     icone,
@@ -24,43 +27,40 @@ export default function Botao({
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
 
-    // o botão não responde enquanto carrega ou se estiver desabilitado
     const bloqueado = carregando || desabilitado;
-
-    // cor da rodinha e do texto: branco no principal, cor do tema no contorno
     const corDoTexto = variante === "principal" ? cores.textoSobreCor : cores.primaria;
+    const tamanho = pequeno ? estilos.pequeno : estilos.normal;
 
-    // o que aparece dentro do botão: rodinha ou (ícone +) texto
     const conteudo = carregando ? (
         <ActivityIndicator color={corDoTexto} />
     ) : (
         <View style={estilos.linha}>
-            {icone && <Ionicons name={icone} size={20} color={corDoTexto} />}
-            <Text style={[estilos.texto, { color: corDoTexto }]}>{texto}</Text>
+            {icone && <Ionicons name={icone} size={pequeno ? 18 : 20} color={corDoTexto} />}
+            <Text style={[pequeno ? estilos.textoPequeno : estilos.texto, { color: corDoTexto }]}>
+                {texto}
+            </Text>
         </View>
     );
 
-    // botão de contorno: sem degradê
     if (variante === "contorno") {
         return (
             <Pressable
                 onPress={onPress}
                 disabled={bloqueado}
-                style={[estilos.base, estilos.contorno, bloqueado && estilos.bloqueado]}
+                style={[estilos.base, tamanho, estilos.contorno, bloqueado && estilos.bloqueado]}
             >
                 {conteudo}
             </Pressable>
         );
     }
 
-    // botão principal: com degradê da cor primária para a primária forte
     return (
         <Pressable onPress={onPress} disabled={bloqueado} style={bloqueado && estilos.bloqueado}>
             <LinearGradient
                 colors={[cores.primaria, cores.primariaForte]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={estilos.base}
+                style={[estilos.base, tamanho]}
             >
                 {conteudo}
             </LinearGradient>
@@ -71,26 +71,37 @@ export default function Botao({
 function criarEstilos(cores: Cores) {
     return StyleSheet.create({
         base: {
-            height: 52,
-            borderRadius: 14,
             alignItems: "center",
             justifyContent: "center",
+        },
+        normal: {
+            height: 52,
+            borderRadius: 14,
             paddingHorizontal: 20,
+        },
+        pequeno: {
+            height: 38,
+            borderRadius: 999,
+            paddingHorizontal: 14,
         },
         contorno: {
             borderWidth: 1.5,
             borderColor: cores.primaria,
         },
         bloqueado: {
-            opacity: 0.6, // fica meio apagado
+            opacity: 0.6,
         },
         linha: {
             flexDirection: "row",
             alignItems: "center",
-            gap: 8,
+            gap: 6,
         },
         texto: {
             fontSize: 16,
+            fontWeight: "700",
+        },
+        textoPequeno: {
+            fontSize: 13,
             fontWeight: "700",
         },
     });

@@ -1,5 +1,6 @@
-import { api } from "../api";
-import { CriarLocal, EditarLocal, LocalCard, Pagina } from "../../models/Local";
+// Locais na API Java
+import { api } from "./api";
+import { CriarLocal, EditarLocal, LocalCard, Pagina } from "../models/Local";
 
 async function listar(busca: string, pagina: number, tamanho: number): Promise<Pagina<LocalCard>> {
     const resposta = await api.get<Pagina<LocalCard>>("/locais", {
@@ -27,4 +28,4 @@ async function alterarAlertas(id: number, receberAlertas: boolean): Promise<Loca
     return resposta.data;
 }
 
-export const locaisApi = { listar, criar, editar, remover, alterarAlertas };
+export const locaisService = { listar, criar, editar, remover, alterarAlertas };

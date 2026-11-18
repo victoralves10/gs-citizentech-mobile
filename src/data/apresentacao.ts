@@ -1,3 +1,4 @@
+// Textos e ícones das páginas da apresentação
 import { ImageSourcePropType } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 

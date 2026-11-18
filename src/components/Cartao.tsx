@@ -3,21 +3,20 @@ import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native"
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
+// Caixa branca com borda e cantos arredondados (tocável se tiver onPress)
 type Props = {
     children: ReactNode;
     onPress?: () => void;
-    semEspaco?: boolean; // tira o espaço interno (útil para listas, que já têm o próprio espaço)
-    style?: StyleProp<ViewStyle>; // estilos extras, se a tela precisar
+    semEspaco?: boolean; // sem espaço interno (para listas)
+    style?: StyleProp<ViewStyle>;
 };
 
 export default function Cartao({ children, onPress, semEspaco = false, style }: Props) {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
 
-    // junta os estilos: o básico + sem espaço (se pedido) + o que veio da tela
     const estiloFinal = [estilos.cartao, semEspaco && estilos.semEspaco, style];
 
-    // com onPress: Pressable (dá para tocar). "pressed" = o dedo está em cima.
     if (onPress) {
         return (
             <Pressable
@@ -29,7 +28,6 @@ export default function Cartao({ children, onPress, semEspaco = false, style }: 
         );
     }
 
-    // sem onPress: uma View comum
     return <View style={estiloFinal}>{children}</View>;
 }
 
@@ -44,10 +42,10 @@ function criarEstilos(cores: Cores) {
         },
         semEspaco: {
             padding: 0,
-            overflow: "hidden", // garante que o conteúdo respeite os cantos arredondados
+            overflow: "hidden",
         },
         pressionado: {
-            opacity: 0.85, // dá um retorno visual quando o usuário toca
+            opacity: 0.85,
         },
     });
 }

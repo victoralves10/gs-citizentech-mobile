@@ -1,33 +1,33 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import TelaBase from "../components/TelaBase";
 import Cartao from "../components/Cartao";
 import ItemLista from "../components/ItemLista";
-import CampoBusca from "../components/CampoBusca";
 import CampoTexto from "../components/CampoTexto";
 import Interruptor from "../components/Interruptor";
 import Botao from "../components/Botao";
 import TituloSecao from "../components/TituloSecao";
+import Chip from "../components/Chip";
+import Aviso from "../components/Aviso";
+import BuscaDeLugar from "../components/BuscaDeLugar";
 import { useNovoLocal } from "../hooks/useNovoLocal";
 import { ListaDeTelas } from "../navigation/tipos";
 import { descricaoDoLugar } from "../utils/formatar";
 import { useTema } from "../theme/TemaContext";
 import { Cores, transparente } from "../theme/cores";
 
-// apelidos prontos para tocar e preencher
 const SUGESTOES = ["Casa", "Trabalho", "Escola", "Academia"];
 
+// Novo local: 1) buscar o lugar  2) dar um apelido e salvar
 export default function NovoLocal() {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
     const navigation = useNavigation();
 
-    // lugar que veio pronto da tela anterior (pode não vir)
     const rota = useRoute<RouteProp<ListaDeTelas, "NovoLocal">>();
     const novo = useNovoLocal(rota.params?.lugar);
 
-    // salvou: volta para a tela anterior (Meus Locais atualiza a lista sozinha)
     async function salvar() {
         const deuCerto = await novo.salvar();
         if (deuCerto) {
@@ -35,7 +35,7 @@ export default function NovoLocal() {
         }
     }
 
-    // ======================= PASSO 2: lugar escolhido =======================
+    // passo 2: lugar escolhido
     if (novo.escolhido) {
         const lugar = novo.escolhido;
         return (
@@ -67,24 +67,15 @@ export default function NovoLocal() {
                         maxLength={50}
                     />
 
-                    {/* sugestões: tocar preenche o apelido */}
                     <View style={estilos.sugestoes}>
-                        {SUGESTOES.map((sugestao) => {
-                            const ativa = novo.apelido === sugestao;
-                            return (
-                                <Pressable
-                                    key={sugestao}
-                                    onPress={() => novo.setApelido(sugestao)}
-                                    style={[estilos.chip, ativa && estilos.chipAtivo]}
-                                >
-                                    <Text
-                                        style={[estilos.textoChip, ativa && estilos.textoChipAtivo]}
-                                    >
-                                        {sugestao}
-                                    </Text>
-                                </Pressable>
-                            );
-                        })}
+                        {SUGESTOES.map((sugestao) => (
+                            <Chip
+                                key={sugestao}
+                                texto={sugestao}
+                                ativo={novo.apelido === sugestao}
+                                onPress={() => novo.setApelido(sugestao)}
+                            />
+                        ))}
                     </View>
 
                     <TituloSecao titulo="Avisos" />
@@ -117,7 +108,7 @@ export default function NovoLocal() {
         );
     }
 
-    // ======================= PASSO 1: buscar o lugar =======================
+    // passo 1: buscar o lugar
     return (
         <TelaBase comCabecalho>
             <View style={estilos.passo1}>
@@ -125,51 +116,17 @@ export default function NovoLocal() {
                     Procure pelo nome do bairro ou da cidade. Depois você dá um apelido para ele.
                 </Text>
 
-                <CampoBusca
-                    valor={novo.busca}
-                    onMudar={novo.mudarBusca}
-                    placeholder="Digite um bairro ou cidade"
-                    buscando={novo.buscando}
+                <BuscaDeLugar
+                    busca={novo.busca}
+                    onEscolher={novo.escolher}
+                    antesDeBuscar={
+                        <Aviso
+                            icone="map-outline"
+                            texto='Ex.: "Pinheiros", "Campinas", "Copacabana"'
+                            semCartao
+                        />
+                    }
                 />
-
-                {/* resultado da busca: dica, erro, nada encontrado ou a lista */}
-                {novo.buscaCurta ? (
-                    <View style={estilos.vazio}>
-                        <Ionicons name="map-outline" size={40} color={cores.primaria} />
-                        <Text style={estilos.textoVazio}>
-                            Ex.: &quot;Pinheiros&quot;, &quot;Campinas&quot;, &quot;Copacabana&quot;
-                        </Text>
-                    </View>
-                ) : novo.erroBusca ? (
-                    <View style={estilos.vazio}>
-                        <Ionicons name="cloud-offline-outline" size={40} color={cores.textoSuave} />
-                        <Text style={estilos.textoVazio}>{novo.erroBusca}</Text>
-                    </View>
-                ) : novo.resultados.length === 0 ? (
-                    novo.buscando ? (
-                        <ActivityIndicator color={cores.primaria} style={estilos.rodinha} />
-                    ) : (
-                        <View style={estilos.vazio}>
-                            <Ionicons name="search-outline" size={40} color={cores.textoSuave} />
-                            <Text style={estilos.textoVazio}>
-                                Nenhum lugar encontrado. Tente outro nome.
-                            </Text>
-                        </View>
-                    )
-                ) : (
-                    <Cartao semEspaco>
-                        {novo.resultados.map((lugar, indice) => (
-                            <ItemLista
-                                key={lugar.id}
-                                titulo={lugar.nome}
-                                descricao={descricaoDoLugar(lugar)}
-                                icone="location-outline"
-                                divisor={indice > 0}
-                                onPress={() => novo.escolher(lugar)}
-                            />
-                        ))}
-                    </Cartao>
-                )}
             </View>
         </TelaBase>
     );
@@ -185,23 +142,7 @@ function criarEstilos(cores: Cores) {
             lineHeight: 20,
             color: cores.textoSecundario,
         },
-        vazio: {
-            alignItems: "center",
-            gap: 10,
-            marginTop: 32,
-            paddingHorizontal: 20,
-        },
-        textoVazio: {
-            fontSize: 14,
-            lineHeight: 20,
-            textAlign: "center",
-            color: cores.textoSecundario,
-        },
-        rodinha: {
-            marginTop: 32,
-        },
 
-        // passo 2
         linhaEscolhido: {
             flexDirection: "row",
             alignItems: "center",
@@ -235,29 +176,9 @@ function criarEstilos(cores: Cores) {
         },
         sugestoes: {
             flexDirection: "row",
-            flexWrap: "wrap", // se não couber na linha, desce para a próxima
+            flexWrap: "wrap",
             gap: 8,
             marginTop: 12,
-        },
-        chip: {
-            paddingHorizontal: 14,
-            paddingVertical: 8,
-            borderRadius: 999,
-            borderWidth: 1,
-            borderColor: cores.borda,
-            backgroundColor: cores.superficie,
-        },
-        chipAtivo: {
-            borderColor: cores.primaria,
-            backgroundColor: transparente(cores.primaria, 0.12),
-        },
-        textoChip: {
-            fontSize: 14,
-            fontWeight: "600",
-            color: cores.textoSecundario,
-        },
-        textoChipAtivo: {
-            color: cores.primaria,
         },
         erro: {
             marginTop: 16,

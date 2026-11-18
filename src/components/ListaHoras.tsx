@@ -6,6 +6,7 @@ import { hora, porcentagem, temperatura } from "../utils/formatar";
 import { useTema } from "../theme/TemaContext";
 import { Cores, transparente } from "../theme/cores";
 
+// Próximas horas em fileira que rola para o lado
 type Props = {
     horas: PrevisaoHora[];
 };
@@ -16,7 +17,7 @@ export default function ListaHoras({ horas }: Props) {
 
     return (
         <ScrollView
-            horizontal // rola para o lado
+            horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={estilos.fileira}
         >

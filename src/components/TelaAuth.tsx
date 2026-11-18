@@ -16,25 +16,22 @@ import Marca from "./Marca";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
+// Layout do Login e do Cadastro: topo azul + cartão do formulário
 type Props = {
     titulo: string;
     subtitulo: string;
-    children: ReactNode; // o conteúdo do cartão (campos, botão, link)
-    rodape?: ReactNode; // algo para mostrar embaixo do cartão
+    children: ReactNode;
     onVoltar?: () => void; // se vier, aparece a setinha de voltar no topo
 };
 
-export default function TelaAuth({ titulo, subtitulo, children, rodape, onVoltar }: Props) {
+export default function TelaAuth({ titulo, subtitulo, children, onVoltar }: Props) {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
 
-    // "insets" = o tamanho das áreas que o celular ocupa (relógio, câmera, barra de baixo).
-    // Aqui a gente usa para o topo azul ir até em cima, mas o conteúdo não ficar embaixo do relógio.
     const insets = useSafeAreaInsets();
 
     return (
         <View style={estilos.tela}>
-            {/* em cima do azul, os ícones do relógio/bateria ficam brancos */}
             <StatusBar style="light" />
 
             <KeyboardAvoidingView
@@ -49,14 +46,13 @@ export default function TelaAuth({ titulo, subtitulo, children, rodape, onVoltar
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
-                    {/* ---------- TOPO AZUL ---------- */}
+                    {/* Topo azul */}
                     <LinearGradient
                         colors={[cores.primaria, cores.primariaForte]}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
                         style={[estilos.topo, { paddingTop: insets.top + 36 }]}
                     >
-                        {/* enfeites: "bolhas de luz" e nuvens (só decoração) */}
                         <View style={[estilos.bolha, estilos.bolhaGrande]} />
                         <View style={[estilos.bolha, estilos.bolhaPequena]} />
                         <Ionicons
@@ -72,7 +68,6 @@ export default function TelaAuth({ titulo, subtitulo, children, rodape, onVoltar
                             style={estilos.nuvemDireita}
                         />
 
-                        {/* setinha de voltar (só no Cadastro) */}
                         {onVoltar && (
                             <Pressable
                                 onPress={onVoltar}
@@ -90,7 +85,7 @@ export default function TelaAuth({ titulo, subtitulo, children, rodape, onVoltar
                         <Marca />
                     </LinearGradient>
 
-                    {/* ---------- CARTÃO DO FORMULÁRIO ---------- */}
+                    {/* Formulário */}
                     <View style={estilos.cartao}>
                         <View style={estilos.textos}>
                             <Text style={estilos.titulo}>{titulo}</Text>
@@ -98,9 +93,6 @@ export default function TelaAuth({ titulo, subtitulo, children, rodape, onVoltar
                         </View>
                         {children}
                     </View>
-
-                    {/* ---------- RODAPÉ ---------- */}
-                    {rodape && <View style={estilos.rodape}>{rodape}</View>}
                 </ScrollView>
             </KeyboardAvoidingView>
         </View>
@@ -117,9 +109,8 @@ function criarEstilos(cores: Cores) {
             flexGrow: 1,
         },
 
-        // topo azul
         topo: {
-            flexGrow: 1, // o topo "estica" e ocupa o espaço que sobrar: nada de buraco embaixo
+            flexGrow: 1,
             minHeight: 300,
             justifyContent: "center",
             alignItems: "center",
@@ -167,17 +158,15 @@ function criarEstilos(cores: Cores) {
             backgroundColor: "rgba(255, 255, 255, 0.2)",
         },
 
-        // cartão do formulário
         cartao: {
             marginHorizontal: 20,
-            marginTop: -52, // número negativo = sobe por cima do topo azul
+            marginTop: -52,
             padding: 22,
             gap: 16,
             borderRadius: 28,
             backgroundColor: cores.superficie,
             borderWidth: 1,
             borderColor: cores.borda,
-            // sombra (iPhone usa shadow*, Android usa elevation)
             shadowColor: "#000000",
             shadowOffset: { width: 0, height: 10 },
             shadowOpacity: 0.08,
@@ -196,10 +185,6 @@ function criarEstilos(cores: Cores) {
         subtitulo: {
             fontSize: 15,
             color: cores.textoSecundario,
-        },
-        rodape: {
-            paddingTop: 20,
-            alignItems: "center",
         },
     });
 }

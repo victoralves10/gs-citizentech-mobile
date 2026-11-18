@@ -2,15 +2,16 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { mensagemDeErro } from "../services/api";
 import { toastErro, toastSucesso } from "../utils/toast";
-import { emailValido, TAMANHO_MINIMO_SENHA } from "../utils/validacao";
+import { erroDoEmail, semErros, TAMANHO_MINIMO_SENHA } from "../utils/validacao";
 
-type ErrosCadastro = {
+type Erros = {
     nome?: string;
     email?: string;
     senha?: string;
     confirmarSenha?: string;
 };
 
+// Cadastro: valida os campos, cria a conta e já entra
 export function useCadastro() {
     const { cadastrar } = useAuth();
 
@@ -18,38 +19,21 @@ export function useCadastro() {
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
     const [confirmarSenha, setConfirmarSenha] = useState("");
-    const [erros, setErros] = useState<ErrosCadastro>({});
+    const [erros, setErros] = useState<Erros>({});
     const [carregando, setCarregando] = useState(false);
 
-    function validar() {
-        const novosErros: ErrosCadastro = {};
-
-        if (nome.trim().length < 3) {
-            novosErros.nome = "Informe seu nome (mínimo de 3 letras).";
-        }
-
-        if (!email.trim()) {
-            novosErros.email = "Informe o e-mail.";
-        } else if (!emailValido(email)) {
-            novosErros.email = "E-mail inválido.";
-        }
-
-        if (senha.length < TAMANHO_MINIMO_SENHA) {
-            novosErros.senha = `A senha precisa ter no mínimo ${TAMANHO_MINIMO_SENHA} caracteres.`;
-        }
-
-        if (confirmarSenha !== senha) {
-            novosErros.confirmarSenha = "As senhas não são iguais.";
-        }
-
-        setErros(novosErros);
-        return Object.keys(novosErros).length === 0;
-    }
-
     async function enviar() {
-        if (!validar()) {
-            return;
-        }
+        const novosErros: Erros = {
+            nome: nome.trim().length < 3 ? "Informe seu nome (mínimo de 3 letras)." : undefined,
+            email: erroDoEmail(email),
+            senha:
+                senha.length < TAMANHO_MINIMO_SENHA
+                    ? `A senha precisa ter no mínimo ${TAMANHO_MINIMO_SENHA} caracteres.`
+                    : undefined,
+            confirmarSenha: confirmarSenha !== senha ? "As senhas não são iguais." : undefined,
+        };
+        setErros(novosErros);
+        if (!semErros(novosErros)) return;
 
         setCarregando(true);
         try {

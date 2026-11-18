@@ -1,6 +1,7 @@
 import { Switch } from "react-native";
 import { useTema } from "../theme/TemaContext";
 
+// Switch com as cores do tema
 type Props = {
     valor: boolean;
     onMudar?: (novo: boolean) => void;
@@ -15,11 +16,8 @@ export default function Interruptor({ valor, onMudar, desabilitado = false }: Pr
             value={valor}
             onValueChange={onMudar}
             disabled={desabilitado}
-            // cor do trilho: [desligado, ligado]
             trackColor={{ false: cores.borda, true: cores.primaria }}
-            // cor da bolinha (no Android; no iPhone ela já é branca)
             thumbColor={cores.textoSobreCor}
-            // fundo do trilho desligado no iPhone
             ios_backgroundColor={cores.borda}
         />
     );

@@ -1,9 +1,9 @@
-// Listar, criar, editar e excluir os compromissos de um local.
-import { api } from "../api";
-import { Pagina } from "../../models/Local";
-import { Compromisso, CriarCompromisso, EditarCompromisso } from "../../models/Compromisso";
+// Compromissos na API Java
+import { api } from "./api";
+import { Pagina } from "../models/Local";
+import { Compromisso, CriarCompromisso, EditarCompromisso } from "../models/Compromisso";
 
-// GET /locais/{id}/compromissos (só os de hoje em diante, do mais perto ao mais longe)
+// GET /locais/{id}/compromissos (de hoje em diante)
 async function doLocal(localId: number): Promise<Compromisso[]> {
     const resposta = await api.get<Pagina<Compromisso>>(`/locais/${localId}/compromissos`, {
         params: { pagina: 0, tamanho: 50 },
@@ -11,7 +11,7 @@ async function doLocal(localId: number): Promise<Compromisso[]> {
     return resposta.data.itens;
 }
 
-// GET /compromissos (todos os locais, de hoje em diante, do mais perto ao mais longe)
+// GET /compromissos (todos os locais, de hoje em diante)
 async function todos(): Promise<Compromisso[]> {
     const resposta = await api.get<Pagina<Compromisso>>("/compromissos", {
         params: { pagina: 0, tamanho: 50 },
@@ -36,4 +36,4 @@ async function remover(id: number): Promise<void> {
     await api.delete(`/compromissos/${id}`);
 }
 
-export const compromissosApi = { doLocal, todos, criar, editar, remover };
+export const compromissosService = { doLocal, todos, criar, editar, remover };

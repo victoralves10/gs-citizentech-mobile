@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTema } from "../theme/TemaContext";
 
+// Base de toda tela: área segura, rolagem, teclado e puxar para atualizar
 type Props = {
     children: ReactNode;
     rolar?: boolean;
@@ -33,14 +34,10 @@ export default function TelaBase({
     const { cores } = useTema();
 
     return (
-        // SafeAreaView: deixa o conteúdo fora do relógio/câmera do celular.
-        // edges = quais bordas ele protege. Se a tela já tem cabeçalho, o próprio
-        // cabeçalho já desvia do relógio, então não precisa proteger o topo de novo.
         <SafeAreaView
             edges={comCabecalho ? [] : ["top"]}
             style={[estilos.tela, { backgroundColor: cores.fundo }]}
         >
-            {/* KeyboardAvoidingView: empurra o conteúdo para cima quando o teclado abre (iPhone) */}
             <KeyboardAvoidingView
                 style={estilos.tela}
                 behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -49,9 +46,7 @@ export default function TelaBase({
                     <ScrollView
                         ref={refRolagem}
                         contentContainerStyle={estilos.conteudo}
-                        // deixa tocar nos botões mesmo com o teclado aberto
                         keyboardShouldPersistTaps="handled"
-                        // "puxar para atualizar" (só quando a tela passou o aoAtualizar)
                         refreshControl={
                             aoAtualizar ? (
                                 <RefreshControl

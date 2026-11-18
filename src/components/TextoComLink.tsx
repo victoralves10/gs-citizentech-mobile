@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
+// Texto com um link no fim ("Não tem conta? Cadastre-se")
 type Props = {
     texto: string;
     link: string;
@@ -15,7 +16,6 @@ export default function TextoComLink({ texto, link, onPress }: Props) {
     return (
         <View style={estilos.linha}>
             <Text style={estilos.texto}>{texto}</Text>
-            {/* só o link é tocável; hitSlop aumenta a área do toque */}
             <Pressable onPress={onPress} hitSlop={10}>
                 <Text style={estilos.link}>{link}</Text>
             </Pressable>

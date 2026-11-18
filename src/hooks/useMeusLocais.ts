@@ -1,36 +1,37 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { LocalCard } from "../models/Local";
-import { locaisService } from "../services/locais/locaisService";
+import { locaisService } from "../services/locaisService";
 import { mensagemDeErro } from "../services/api";
+import { ESPERA_BUSCA, TAMANHO_PAGINA } from "../config/constantes";
+import { confirmarExclusao } from "../utils/confirmar";
 import { toastErro, toastSucesso } from "../utils/toast";
-
-// quantos locais vêm por página
-const TAMANHO_PAGINA = 10;
-
-// quanto tempo esperar o usuário parar de digitar (em milissegundos)
-const ESPERA_BUSCA = 400;
 
 type Modo = "inicio" | "busca" | "mais" | "puxar";
 
+// Meus Locais: lista com busca, páginas, alertas, principal, apelido e exclusão
 export function useMeusLocais() {
-    // ---------- a lista ----------
     const [locais, setLocais] = useState<LocalCard[]>([]);
     const [pagina, setPagina] = useState(0);
     const [totalPaginas, setTotalPaginas] = useState(0);
     const [totalItens, setTotalItens] = useState(0);
     const [busca, setBusca] = useState("");
 
-    // ---------- estados de carregamento ----------
     const [carregando, setCarregando] = useState(true);
     const [buscando, setBuscando] = useState(false);
     const [carregandoMais, setCarregandoMais] = useState(false);
     const [atualizando, setAtualizando] = useState(false);
     const [erro, setErro] = useState<string>();
 
+    // janela de trocar apelido
+    const [editando, setEditando] = useState<LocalCard | null>(null);
+    const [apelido, setApelido] = useState("");
+    const [erroApelido, setErroApelido] = useState<string>();
+    const [salvando, setSalvando] = useState(false);
+
     const ultimoPedido = useRef(0);
 
-    // ---------- buscar uma página na API ----------
+    // Lista
     const carregar = useCallback(async (paginaPedida: number, modo: Modo, texto: string) => {
         const pedido = ++ultimoPedido.current;
 
@@ -41,7 +42,7 @@ export function useMeusLocais() {
 
         try {
             const resposta = await locaisService.listar(texto, paginaPedida, TAMANHO_PAGINA);
-            if (pedido !== ultimoPedido.current) return; // resposta velha: ignora
+            if (pedido !== ultimoPedido.current) return; // resposta velha
 
             // página 0 troca a lista; as outras juntam no fim
             setLocais((atual) =>
@@ -64,7 +65,7 @@ export function useMeusLocais() {
         }
     }, []);
 
-    // ---------- busca com debounce ----------
+    // busca esperando o usuário parar de digitar
     const jaCarregou = useRef(false);
     useEffect(() => {
         if (!jaCarregou.current) {
@@ -76,7 +77,7 @@ export function useMeusLocais() {
         return () => clearTimeout(espera);
     }, [busca, carregar]);
 
-    // ---------- voltou para a tela: atualiza ----------
+    // voltou para a tela: atualiza
     const primeiraVez = useRef(true);
     useFocusEffect(
         useCallback(() => {
@@ -89,7 +90,6 @@ export function useMeusLocais() {
         }, [])
     );
 
-    // ---------- rolagem infinita e "puxar para atualizar" ----------
     function carregarMais() {
         const temMais = pagina + 1 < totalPaginas;
         if (temMais && !carregandoMais && !carregando) {
@@ -101,24 +101,23 @@ export function useMeusLocais() {
         carregar(0, "puxar", busca);
     }
 
-    // ---------- ações ----------
-
-    // troca um local da lista pelo que a API devolveu
+    // Ações
     function trocarNaLista(atualizado: LocalCard) {
         setLocais((atual) => atual.map((l) => (l.id === atualizado.id ? atualizado : l)));
     }
 
+    // evita mandar o mesmo PATCH duas vezes (o Switch do Android dispara repetido)
     const alertasEmAndamento = useRef(new Set<number>());
 
     async function alternarAlertas(local: LocalCard, ligar: boolean) {
-        if (alertasEmAndamento.current.has(local.id)) return; // já está salvando
+        if (alertasEmAndamento.current.has(local.id)) return;
         alertasEmAndamento.current.add(local.id);
 
         trocarNaLista({ ...local, receberAlertas: ligar });
         try {
             trocarNaLista(await locaisService.alterarAlertas(local.id, ligar));
         } catch (e) {
-            trocarNaLista(local); // deu erro: volta como estava
+            trocarNaLista(local);
             toastErro(mensagemDeErro(e));
         } finally {
             alertasEmAndamento.current.delete(local.id);
@@ -137,33 +136,54 @@ export function useMeusLocais() {
                     ? `${local.apelido} não é mais o principal.`
                     : `${local.apelido} agora aparece na Home.`
             );
-            carregar(0, "puxar", busca);
+            atualizar();
         } catch (e) {
             toastErro(mensagemDeErro(e));
         }
     }
 
-    // trocar o apelido. Se der erro (ex.: apelido repetido), o erro "sobe"
-    // para a tela mostrar dentro da janela.
-    async function renomear(local: LocalCard, apelido: string) {
-        const atualizado = await locaisService.editar(local.id, {
-            apelido: apelido.trim(),
-            receberAlertas: local.receberAlertas,
-            principal: local.principal,
-        });
-        trocarNaLista(atualizado);
-        toastSucesso("Apelido atualizado!");
+    function abrirApelido(local: LocalCard) {
+        setEditando(local);
+        setApelido(local.apelido);
+        setErroApelido(undefined);
     }
 
-    // excluir. Recarrega porque, se era o principal, outro vira principal.
-    async function excluir(local: LocalCard) {
+    async function salvarApelido() {
+        if (!editando) return;
+        if (!apelido.trim()) return setErroApelido("Informe o apelido.");
+
+        setSalvando(true);
         try {
-            await locaisService.remover(local.id);
-            toastSucesso(`${local.apelido} foi excluído.`);
-            carregar(0, "puxar", busca);
+            trocarNaLista(
+                await locaisService.editar(editando.id, {
+                    apelido: apelido.trim(),
+                    receberAlertas: editando.receberAlertas,
+                    principal: editando.principal,
+                })
+            );
+            toastSucesso("Apelido atualizado!");
+            setEditando(null);
         } catch (e) {
-            toastErro(mensagemDeErro(e));
+            setErroApelido(mensagemDeErro(e));
+        } finally {
+            setSalvando(false);
         }
+    }
+
+    function excluir(local: LocalCard) {
+        confirmarExclusao({
+            titulo: `Excluir ${local.apelido}?`,
+            mensagem: "Os compromissos deste local também serão apagados.",
+            aoConfirmar: async () => {
+                try {
+                    await locaisService.remover(local.id);
+                    toastSucesso(`${local.apelido} foi excluído.`);
+                    atualizar(); // se era o principal, outro vira principal
+                } catch (e) {
+                    toastErro(mensagemDeErro(e));
+                }
+            },
+        });
     }
 
     return {
@@ -180,7 +200,16 @@ export function useMeusLocais() {
         atualizar,
         alternarAlertas,
         mudarPrincipal,
-        renomear,
         excluir,
+        apelidoJanela: {
+            aberta: editando !== null,
+            apelido,
+            setApelido,
+            erro: erroApelido,
+            salvando,
+            abrir: abrirApelido,
+            fechar: () => setEditando(null),
+            salvar: salvarApelido,
+        },
     };
 }

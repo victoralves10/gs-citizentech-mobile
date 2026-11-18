@@ -1,29 +1,21 @@
-// Mostra os alertas e as mudanças na previsão de todos os locais com alertas ligados.
-// Toda a lógica está no hook useAlertas.
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
 import TelaBase from "../components/TelaBase";
 import CabecalhoTela from "../components/CabecalhoTela";
 import Segmentado from "../components/Segmentado";
 import TituloSecao from "../components/TituloSecao";
-import Cartao from "../components/Cartao";
-import Botao from "../components/Botao";
 import Selo from "../components/Selo";
-import CartaoAlerta from "../components/CartaoAlerta";
-import CartaoMudanca from "../components/CartaoMudanca";
+import Aviso from "../components/Aviso";
+import Botao from "../components/Botao";
+import Carregando from "../components/Carregando";
+import ListaAlertas from "../components/ListaAlertas";
+import ListaMudancas from "../components/ListaMudancas";
 import { useAlertas } from "../hooks/useAlertas";
-import { useTema } from "../theme/TemaContext";
-import { Cores } from "../theme/cores";
 
+// Aba Alertas: alertas e mudanças de todos os locais com alertas ligados
 export default function Alertas() {
-    const { cores } = useTema();
-    const estilos = criarEstilos(cores);
     const navigation = useNavigation();
     const { dados, carregando, atualizando, erro, filtro, setFiltro, atualizar } = useAlertas();
-
-    const mostrarAlertas = filtro !== "MUDANCAS";
-    const mostrarMudancas = filtro !== "ALERTAS";
 
     function subtitulo() {
         if (!dados) return undefined;
@@ -32,67 +24,50 @@ export default function Alertas() {
         return n === 1 ? "1 alerta nos próximos dias" : `${n} alertas nos próximos dias`;
     }
 
-    function aviso(
-        icone: keyof typeof Ionicons.glyphMap,
-        titulo: string,
-        texto: string,
-        botao?: { texto: string; onPress: () => void }
-    ) {
-        return (
-            <Cartao>
-                <View style={estilos.aviso}>
-                    <Ionicons name={icone} size={40} color={cores.primaria} />
-                    <Text style={estilos.tituloAviso}>{titulo}</Text>
-                    <Text style={estilos.textoAviso}>{texto}</Text>
-                    {botao && <Botao texto={botao.texto} onPress={botao.onPress} />}
-                </View>
-            </Cartao>
-        );
-    }
-
-    function vazio(texto: string) {
-        return (
-            <Cartao>
-                <View style={estilos.linhaVazia}>
-                    <Ionicons name="checkmark-circle" size={22} color={cores.sucesso} />
-                    <Text style={estilos.textoVazio}>{texto}</Text>
-                </View>
-            </Cartao>
-        );
-    }
-
     function conteudo() {
-        if (carregando) {
-            return (
-                <ActivityIndicator size="large" color={cores.primaria} style={estilos.rodinha} />
-            );
-        }
+        if (carregando) return <Carregando />;
+
         if (!dados) {
-            return aviso("cloud-offline-outline", "Não deu para carregar", erro ?? "", {
-                texto: "Tentar de novo",
-                onPress: atualizar,
-            });
-        }
-        if (!dados.temLocais) {
-            return aviso(
-                "location-outline",
-                "Nenhum local salvo",
-                "Cadastre um local para receber alertas de chuva, calor, vento e mais.",
-                { texto: "Adicionar local", onPress: () => navigation.navigate("NovoLocal") }
+            return (
+                <Aviso icone="cloud-offline-outline" titulo="Não deu para carregar" texto={erro}>
+                    <Botao texto="Tentar de novo" variante="contorno" onPress={atualizar} />
+                </Aviso>
             );
         }
+
+        if (!dados.temLocais) {
+            return (
+                <Aviso
+                    icone="location-outline"
+                    titulo="Nenhum local salvo"
+                    texto="Cadastre um local para receber alertas de chuva, calor, vento e mais."
+                >
+                    <Botao
+                        texto="Adicionar local"
+                        onPress={() => navigation.navigate("NovoLocal")}
+                    />
+                </Aviso>
+            );
+        }
+
         if (dados.locaisComAlerta === 0) {
-            return aviso(
-                "notifications-off-outline",
-                "Alertas desligados",
-                'Ligue "Receber alertas" em pelo menos um local para ver os avisos aqui.',
-                { texto: "Ir para Meus Locais", onPress: () => navigation.navigate("MeusLocais") }
+            return (
+                <Aviso
+                    icone="notifications-off-outline"
+                    titulo="Alertas desligados"
+                    texto='Ligue "Receber alertas" em pelo menos um local para ver os avisos aqui.'
+                >
+                    <Botao
+                        texto="Ir para Meus Locais"
+                        onPress={() => navigation.navigate("MeusLocais")}
+                    />
+                </Aviso>
             );
         }
 
         return (
             <>
-                {mostrarAlertas && (
+                {filtro !== "MUDANCAS" && (
                     <>
                         <TituloSecao
                             titulo="Alertas"
@@ -102,54 +77,22 @@ export default function Alertas() {
                                 ) : undefined
                             }
                         />
-                        {dados.alertas.length > 0 ? (
-                            <View style={estilos.lista}>
-                                {dados.alertas.map((item) => (
-                                    <Pressable
-                                        key={item.chave}
-                                        onPress={() =>
-                                            navigation.navigate("DetalhesLocal", {
-                                                localId: item.localId,
-                                                apelido: item.apelido,
-                                            })
-                                        }
-                                    >
-                                        <CartaoAlerta
-                                            alerta={item.alerta}
-                                            local={item.apelido}
-                                            mostrarDia
-                                        />
-                                    </Pressable>
-                                ))}
-                            </View>
-                        ) : (
-                            vazio("Nenhum alerta nos próximos dias.")
-                        )}
+                        <ListaAlertas
+                            itens={dados.alertas}
+                            mostrarDia
+                            textoVazio="Nenhum alerta nos próximos dias."
+                        />
                     </>
                 )}
 
-                {mostrarMudancas && (
+                {filtro !== "ALERTAS" && (
                     <>
                         <TituloSecao titulo="O que mudou na previsão" />
-                        {dados.mudancas.length > 0 ? (
-                            <View style={estilos.lista}>
-                                {dados.mudancas.map((mudanca) => (
-                                    <Pressable
-                                        key={`${mudanca.id}-${mudanca.localId}`}
-                                        onPress={() =>
-                                            navigation.navigate("DetalhesLocal", {
-                                                localId: mudanca.localId,
-                                                apelido: mudanca.localApelido,
-                                            })
-                                        }
-                                    >
-                                        <CartaoMudanca mudanca={mudanca} />
-                                    </Pressable>
-                                ))}
-                            </View>
-                        ) : (
-                            vazio("A previsão não mudou nas últimas horas.")
-                        )}
+                        <ListaMudancas
+                            mudancas={dados.mudancas}
+                            abrirLocal
+                            textoVazio="A previsão não mudou nas últimas horas."
+                        />
                     </>
                 )}
             </>
@@ -160,7 +103,6 @@ export default function Alertas() {
         <TelaBase aoAtualizar={atualizar} atualizando={atualizando}>
             <View>
                 <CabecalhoTela titulo="Alertas" subtitulo={subtitulo()} />
-
                 <Segmentado
                     opcoes={[
                         { valor: "TODOS", rotulo: "Todos" },
@@ -170,51 +112,14 @@ export default function Alertas() {
                     valor={filtro}
                     onMudar={setFiltro}
                 />
-
                 <View style={estilos.corpo}>{conteudo()}</View>
             </View>
         </TelaBase>
     );
 }
 
-function criarEstilos(cores: Cores) {
-    return StyleSheet.create({
-        corpo: {
-            marginTop: 8,
-        },
-        rodinha: {
-            marginTop: 48,
-        },
-        lista: {
-            gap: 10,
-        },
-        aviso: {
-            alignItems: "center",
-            gap: 10,
-            paddingVertical: 8,
-        },
-        tituloAviso: {
-            fontSize: 18,
-            fontWeight: "800",
-            textAlign: "center",
-            color: cores.texto,
-        },
-        textoAviso: {
-            fontSize: 14,
-            lineHeight: 20,
-            textAlign: "center",
-            color: cores.textoSecundario,
-            marginBottom: 6,
-        },
-        linhaVazia: {
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 10,
-        },
-        textoVazio: {
-            flex: 1,
-            fontSize: 14,
-            color: cores.textoSecundario,
-        },
-    });
-}
+const estilos = StyleSheet.create({
+    corpo: {
+        marginTop: 8,
+    },
+});

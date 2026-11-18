@@ -3,9 +3,10 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
+// Título de seção com selo e ação opcionais ("Ver todos")
 type Props = {
     titulo: string;
-    selo?: ReactNode; // ReactNode = qualquer coisa que dá para desenhar (um <Selo />, por ex.)
+    selo?: ReactNode;
     textoAcao?: string;
     onAcao?: () => void;
 };
@@ -16,13 +17,11 @@ export default function TituloSecao({ titulo, selo, textoAcao, onAcao }: Props) 
 
     return (
         <View style={estilos.linha}>
-            {/* lado esquerdo: título + selo */}
             <View style={estilos.esquerda}>
                 <Text style={estilos.titulo}>{titulo}</Text>
                 {selo}
             </View>
 
-            {/* lado direito: a ação (só aparece se as duas props vierem) */}
             {textoAcao && onAcao && (
                 <Pressable onPress={onAcao} hitSlop={10}>
                     <Text style={estilos.acao}>{textoAcao}</Text>
@@ -38,8 +37,8 @@ function criarEstilos(cores: Cores) {
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
-            marginTop: 24, // separa da seção de cima
-            marginBottom: 10, // separa do conteúdo de baixo
+            marginTop: 24,
+            marginBottom: 10,
         },
         esquerda: {
             flexDirection: "row",

@@ -22,11 +22,9 @@ import SobreApp from "../screens/SobreApp";
 import MeusCompromissos from "../screens/MeusCompromissos";
 import NovoLocal from "../screens/NovoLocal";
 
-// cria os 2 navegadores (os dois conhecem a nossa lista de telas)
 const Pilha = createNativeStackNavigator<ListaDeTelas>();
 const Aba = createBottomTabNavigator<ListaDeTelas>();
 
-// ícone de cada aba (nome da tela → nome do ícone)
 const ICONES_DAS_ABAS = {
     Home: "home-outline",
     MeusLocais: "location-outline",
@@ -35,18 +33,16 @@ const ICONES_DAS_ABAS = {
     Perfil: "person-outline",
 } as const;
 
-// As abas de baixo
+// Abas
 function Abas() {
     const { cores } = useTema();
 
     return (
         <Aba.Navigator
-            // screenOptions vale para TODAS as abas.
-            // Ele recebe a "route" (a aba) para escolher o ícone certo.
             screenOptions={({ route }) => ({
-                headerShown: false, // as abas não mostram cabeçalho (cada tela tem o seu título)
-                tabBarActiveTintColor: cores.primaria, // cor da aba selecionada
-                tabBarInactiveTintColor: cores.textoSuave, // cor das outras
+                headerShown: false,
+                tabBarActiveTintColor: cores.primaria,
+                tabBarInactiveTintColor: cores.textoSuave,
                 tabBarStyle: { backgroundColor: cores.superficie, borderTopColor: cores.borda },
                 tabBarIcon: ({ color, size }) => (
                     <Ionicons
@@ -70,14 +66,12 @@ function Abas() {
     );
 }
 
-// A navegação completa do app
+// Navegação do app
 export default function Rotas() {
     const { cores, escuro } = useTema();
     const { logado, carregando } = useAuth();
     const { jaViuApresentacao } = useApresentacao();
-    // O React Navigation tem o próprio tema (cor de fundo, do cabeçalho...).
-    // Aqui a gente pega o tema padrão dele (claro ou escuro) e troca as cores
-    // pelas nossas. O "..." copia tudo que já existe e só substitui o que a gente escreveu.
+    // tema do React Navigation com as cores do app
     const temaBase = escuro ? DarkTheme : DefaultTheme;
     const temaNavegacao = {
         ...temaBase,
@@ -91,8 +85,6 @@ export default function Rotas() {
         },
     };
 
-    // enquanto confere a sessão salva e o sinal da apresentação, mostra a rodinha
-    // (senão o Login piscaria na tela antes de entrar no app)
     if (carregando || jaViuApresentacao === null) {
         return <Carregando texto="Abrindo o app..." />;
     }
@@ -101,7 +93,7 @@ export default function Rotas() {
         <NavigationContainer theme={temaNavegacao}>
             <Pilha.Navigator>
                 {logado ? (
-                    // ---------- telas de DENTRO (com login) ----------
+                    // Com login
                     <>
                         <Pilha.Screen
                             name="Abas"
@@ -111,7 +103,6 @@ export default function Rotas() {
                         <Pilha.Screen
                             name="DetalhesLocal"
                             component={DetalhesLocal}
-                            // o título é o apelido do local ("Casa"), que vem junto ao abrir
                             options={({ route }) => ({
                                 title: route.params?.apelido ?? "Detalhes do local",
                             })}
@@ -138,11 +129,9 @@ export default function Rotas() {
                         />
                     </>
                 ) : (
-                    // ---------- telas de FORA (sem login) ----------
+                    // Sem login
                     <>
-                        {/* nunca viu a apresentação: ela entra PRIMEIRO na lista (é a tela inicial).
-                            Ao tocar em "Começar", jaViuApresentacao vira true, ela sai da lista
-                            e o app mostra o Login sozinho. */}
+                        {/* na 1ª abertura, a apresentação vem antes do Login */}
                         {!jaViuApresentacao && (
                             <Pilha.Screen
                                 name="Apresentacao"
@@ -164,7 +153,6 @@ export default function Rotas() {
                 )}
             </Pilha.Navigator>
 
-            {/* barra de cima do celular: clara no tema escuro e escura no claro */}
             <StatusBar style={escuro ? "light" : "dark"} />
         </NavigationContainer>
     );

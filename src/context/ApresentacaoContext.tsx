@@ -8,15 +8,14 @@ type ApresentacaoContextDados = {
 
 const ApresentacaoContext = createContext<ApresentacaoContextDados | null>(null);
 
+// Guarda se a apresentação já foi vista
 export function ApresentacaoProvider({ children }: { children: ReactNode }) {
     const [jaViuApresentacao, setJaViuApresentacao] = useState<boolean | null>(null);
 
-    // quando o app abre: lê o sinal salvo no celular
     useEffect(() => {
         apresentacaoFoiVista().then(setJaViuApresentacao);
     }, []);
 
-    // salva no celular e avisa o app inteiro
     async function concluirApresentacao() {
         await marcarApresentacaoVista();
         setJaViuApresentacao(true);

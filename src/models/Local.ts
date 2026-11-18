@@ -1,4 +1,4 @@
-// um card da tela Meus Locais (GET /locais, POST /locais, PUT, PATCH)
+// Locais (iguais à API Java)
 export type LocalCard = {
     id: number;
     apelido: string; // "Casa", "Trabalho"...
@@ -8,8 +8,7 @@ export type LocalCard = {
     receberAlertas: boolean;
 };
 
-// o que o app manda para criar um local (POST /locais).
-// Os dados do endereço vêm do lugar escolhido na busca (geocoding).
+// POST /locais (endereço vem do lugar escolhido na busca)
 export type CriarLocal = {
     apelido: string;
     receberAlertas?: boolean;
@@ -22,14 +21,14 @@ export type CriarLocal = {
     fuso: string; // ex.: "America/Sao_Paulo"
 };
 
-// o que o app manda para editar um local (PUT /locais/{id})
+// PUT /locais/{id}
 export type EditarLocal = {
     apelido: string;
     receberAlertas: boolean;
     principal: boolean;
 };
 
-// listas com páginas (GET /locais, GET /compromissos...)
+// lista paginada
 export type Pagina<T> = {
     itens: T[];
     pagina: number; // começa em 0

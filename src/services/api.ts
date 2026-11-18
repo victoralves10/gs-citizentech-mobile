@@ -2,7 +2,7 @@ import { create, isAxiosError } from "axios";
 import { buscarToken } from "../storage/sessaoStorage";
 import { log } from "../utils/log";
 
-// endereço da API Java (no Render)
+// Axios da API Java + tradução de erros
 export const API_URL = "https://garoavisa-api.onrender.com";
 
 export const api = create({
@@ -10,7 +10,7 @@ export const api = create({
     timeout: 60000,
 });
 
-// ANTES de cada requisição: coloca o token no cabeçalho "Authorization"
+// coloca o token em cada requisição
 api.interceptors.request.use(async (config) => {
     const token = await buscarToken();
     if (token) {
@@ -26,7 +26,6 @@ export function aoExpirarSessao(funcao: () => void) {
     quandoExpirar = funcao;
 }
 
-// DEPOIS de cada resposta: escreve no terminal se deu certo ou errado
 api.interceptors.response.use(
     (resposta) => {
         log.api(`${resposta.config.url} → ${resposta.status}`);
@@ -36,8 +35,7 @@ api.interceptors.response.use(
         const status = erro.response ? erro.response.status : "sem resposta";
         log.erro(`${erro.config?.url} → ${status}`);
 
-        // 401 fora do login/cadastro = token vencido ou inválido.
-        // (no login, 401 é só "senha errada": esse a tela mostra normalmente)
+        // 401 fora do login = sessão vencida
         const ehRotaDeLogin = erro.config?.url?.startsWith("/auth");
         if (status === 401 && !ehRotaDeLogin && quandoExpirar) {
             quandoExpirar();
@@ -47,26 +45,22 @@ api.interceptors.response.use(
     }
 );
 
-// transforma qualquer erro em uma mensagem para mostrar ao usuário
+// erro → mensagem para o usuário
 export function mensagemDeErro(erro: unknown): string {
     if (isAxiosError(erro)) {
-        // demorou demais (ex.: o Render estava acordando)
         if (erro.code === "ECONNABORTED") {
             return "O servidor demorou para responder. Tente de novo.";
         }
-        // nem chegou no servidor (sem internet, endereço errado...)
         if (!erro.response) {
             return "Sem conexão com o servidor. Tente de novo.";
         }
 
-        // token vencido: o AuthContext já está saindo da conta
         if (erro.response.status === 401 && !erro.config?.url?.startsWith("/auth")) {
             return "Sua sessão expirou. Entre de novo.";
         }
 
         const dados = erro.response.data;
 
-        // erro de validação: mostra a primeira mensagem da lista "erros"
         if (dados?.erros) {
             const primeiraMensagem = Object.values(dados.erros)[0];
             if (typeof primeiraMensagem === "string") {
@@ -74,11 +68,9 @@ export function mensagemDeErro(erro: unknown): string {
             }
         }
 
-        // erro comum: usa o "detail" (ou "mensagem", se algum dia vier assim)
         return dados?.detail ?? dados?.mensagem ?? "Algo deu errado. Tente de novo.";
     }
 
-    // erro comum (é o que o mock usa)
     if (erro instanceof Error) {
         return erro.message;
     }

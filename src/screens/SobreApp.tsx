@@ -11,7 +11,6 @@ import Selo from "../components/Selo";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
-// integrantes do grupo
 const EQUIPE = [
     { nome: "Eduardo Batista Locaspi", rm: "RM561713" },
     { nome: "Enzo Vieira Bernardini", rm: "RM563000" },
@@ -19,14 +18,14 @@ const EQUIPE = [
     { nome: "Victor Alves Lopes", rm: "RM561833" },
 ];
 
-// tecnologias usadas no projeto (aparecem como selos)
 const TECNOLOGIAS = ["React Native", "Expo", "TypeScript", "Java Spring", "Oracle", "Open-Meteo"];
 
+// Sobre o App: versão, commit do build, equipe e tecnologias
 export default function SobreApp() {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
 
-    // dados da configuração do app (o "??" usa o texto da direita se o valor não existir)
+    // versão, commit e data vêm do app.config.js
     const versao = Constants.expoConfig?.version ?? "-";
     const commit = Constants.expoConfig?.extra?.commit ?? "-";
     const dataBuild = Constants.expoConfig?.extra?.dataBuild ?? "-";
@@ -34,9 +33,7 @@ export default function SobreApp() {
 
     return (
         <TelaBase comCabecalho>
-            {/* View única: o espaço entre as seções fica por conta do TituloSecao */}
             <View>
-                {/* ---------- CARTÃO DA MARCA ---------- */}
                 <LinearGradient
                     colors={[cores.primaria, cores.primariaForte]}
                     start={{ x: 0, y: 0 }}
@@ -51,7 +48,6 @@ export default function SobreApp() {
                     </View>
                 </LinearGradient>
 
-                {/* ---------- O QUE É ---------- */}
                 <TituloSecao titulo="O que é" />
                 <Cartao>
                     <Text style={estilos.paragrafo}>
@@ -60,7 +56,6 @@ export default function SobreApp() {
                     </Text>
                 </Cartao>
 
-                {/* ---------- INFORMAÇÕES DO BUILD ---------- */}
                 <TituloSecao titulo="Informações do build" />
                 <Cartao semEspaco>
                     <ItemLista
@@ -98,7 +93,6 @@ export default function SobreApp() {
                     />
                 </Cartao>
 
-                {/* ---------- EQUIPE ---------- */}
                 <TituloSecao titulo="Equipe" />
                 <Cartao semEspaco>
                     {EQUIPE.map((pessoa, indice) => (
@@ -112,7 +106,6 @@ export default function SobreApp() {
                     ))}
                 </Cartao>
 
-                {/* ---------- TECNOLOGIAS ---------- */}
                 <TituloSecao titulo="Feito com" />
                 <View style={estilos.selos}>
                     {TECNOLOGIAS.map((tecnologia) => (
@@ -120,9 +113,8 @@ export default function SobreApp() {
                     ))}
                 </View>
 
-                {/* ---------- RODAPÉ ---------- */}
                 <Text style={estilos.rodape}>Global Solution 2026/2 · CitizenTech · FIAP</Text>
-                {/* a Open-Meteo pede que o app cite a fonte dos dados (licença CC BY 4.0) */}
+                {/* a Open-Meteo pede citar a fonte (CC BY 4.0) */}
                 <Text style={estilos.fonte}>Dados do clima: Open-Meteo.com</Text>
             </View>
         </TelaBase>
@@ -131,7 +123,6 @@ export default function SobreApp() {
 
 function criarEstilos(cores: Cores) {
     return StyleSheet.create({
-        // cartão da marca
         cartaoMarca: {
             alignItems: "center",
             paddingVertical: 28,
@@ -169,7 +160,6 @@ function criarEstilos(cores: Cores) {
             color: cores.textoSobreCor,
         },
 
-        // textos
         paragrafo: {
             fontSize: 15,
             lineHeight: 22,
@@ -184,14 +174,12 @@ function criarEstilos(cores: Cores) {
             color: cores.primaria,
         },
 
-        // selos das tecnologias, um do lado do outro, quebrando linha quando não cabe
         selos: {
             flexDirection: "row",
             flexWrap: "wrap",
             gap: 8,
         },
 
-        // rodapé
         rodape: {
             marginTop: 28,
             textAlign: "center",

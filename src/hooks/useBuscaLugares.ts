@@ -1,34 +1,28 @@
 import { useEffect, useRef, useState } from "react";
 import { Lugar } from "../models/Lugar";
-import { lugaresService } from "../services/lugares/lugaresService";
+import { lugaresService } from "../services/lugaresService";
 import { mensagemDeErro } from "../services/api";
+import { ESPERA_BUSCA, MINIMO_LETRAS_BUSCA } from "../config/constantes";
 
-const ESPERA_BUSCA = 400; // milissegundos
-const MINIMO_LETRAS = 2; // a busca só funciona com 2 letras ou mais
-
+// Busca de lugares por nome, esperando o usuário parar de digitar
 export function useBuscaLugares() {
     const [busca, setBusca] = useState("");
     const [resultados, setResultados] = useState<Lugar[]>([]);
     const [buscando, setBuscando] = useState(false);
     const [erroBusca, setErroBusca] = useState<string>();
 
-    // número da última busca (para ignorar uma resposta velha)
+    // número da última busca, para ignorar respostas velhas
     const ultimoPedido = useRef(0);
 
-    // a rodinha já aparece ao digitar (antes mesmo da espera do debounce)
     function mudarBusca(texto: string) {
         setBusca(texto);
-        setBuscando(texto.trim().length >= MINIMO_LETRAS);
+        setBuscando(texto.trim().length >= MINIMO_LETRAS_BUSCA);
     }
 
-    // toda vez que "busca" muda, espera 400 ms. Se mudar de novo antes,
-    // o "return" cancela a espera anterior (clearTimeout) e começa outra.
     useEffect(() => {
         const texto = busca.trim();
-
-        // menos de 2 letras: nem chama a busca
-        if (texto.length < MINIMO_LETRAS) {
-            ultimoPedido.current++; // descarta uma busca que ainda esteja chegando
+        if (texto.length < MINIMO_LETRAS_BUSCA) {
+            ultimoPedido.current++;
             return;
         }
 
@@ -36,7 +30,7 @@ export function useBuscaLugares() {
             const pedido = ++ultimoPedido.current;
             try {
                 const lugares = await lugaresService.buscar(texto);
-                if (pedido !== ultimoPedido.current) return; // resposta velha: ignora
+                if (pedido !== ultimoPedido.current) return;
                 setResultados(lugares);
                 setErroBusca(undefined);
             } catch (e) {
@@ -56,6 +50,8 @@ export function useBuscaLugares() {
         resultados,
         buscando,
         erroBusca,
-        buscaCurta: busca.trim().length < MINIMO_LETRAS,
+        buscaCurta: busca.trim().length < MINIMO_LETRAS_BUSCA,
     };
 }
+
+export type BuscaLugares = ReturnType<typeof useBuscaLugares>;

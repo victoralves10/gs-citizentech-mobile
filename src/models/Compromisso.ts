@@ -1,4 +1,4 @@
-// um compromisso (GET /compromissos, GET /locais/{id}/compromissos...)
+// Compromissos (iguais à API Java)
 export type Compromisso = {
     id: number;
     nome: string; // "Reunião de alinhamento"
@@ -7,13 +7,13 @@ export type Compromisso = {
     localApelido: string; // "Trabalho"
 };
 
-// o que o app manda para criar (POST /locais/{localId}/compromissos)
+// POST /locais/{id}/compromissos
 export type CriarCompromisso = {
     nome: string;
     data: string; // "2026-11-20"
 };
 
-// o que o app manda para editar (PUT /compromissos/{id})
+// PUT /compromissos/{id}
 export type EditarCompromisso = {
     nome: string;
     data: string;

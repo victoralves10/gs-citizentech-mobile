@@ -14,6 +14,7 @@ export type Opcao = {
     perigo?: boolean;
 };
 
+// Menu que sobe de baixo com opções (o Alert do Android só aceita 3 botões)
 type Props = {
     visivel: boolean;
     titulo: string;
@@ -35,8 +36,7 @@ export default function MenuOpcoes({
     const estilos = criarEstilos(cores);
     const { bottom } = useSafeAreaInsets();
 
-    // fecha o menu e DEPOIS roda a ação (assim um Alert ou outra janela
-    // não abre por cima do menu que ainda está fechando)
+    // fecha o menu antes de rodar a ação
     function escolher(opcao: Opcao) {
         onFechar();
         setTimeout(opcao.onPress, 250);

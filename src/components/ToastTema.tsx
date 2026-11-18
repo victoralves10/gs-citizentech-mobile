@@ -3,15 +3,14 @@ import Toast, { ToastConfig } from "react-native-toast-message";
 import { Ionicons } from "@expo/vector-icons";
 import { useTema } from "../theme/TemaContext";
 
+// Visual dos toasts com as cores do tema
 export default function ToastTema() {
     const { cores } = useTema();
 
-    // desenha um toast com a cor e o ícone de cada tipo
     function modelo(
         cor: string,
         icone: "checkmark-circle" | "close-circle" | "information-circle"
     ) {
-        // a biblioteca chama esta função passando o texto do toast (text1)
         return function ToastModelo({ text1 }: { text1?: string }) {
             return (
                 <View
@@ -27,7 +26,6 @@ export default function ToastTema() {
         };
     }
 
-    // um modelo para cada tipo: success (verde), error (vermelho), info (azul)
     const config: ToastConfig = {
         success: modelo(cores.sucesso, "checkmark-circle"),
         error: modelo(cores.erro, "close-circle"),
@@ -37,11 +35,10 @@ export default function ToastTema() {
     return <Toast config={config} bottomOffset={90} />;
 }
 
-// estes estilos não dependem do tema (as cores entram direto no style lá em cima)
 const estilos = StyleSheet.create({
     caixa: {
         width: "90%",
-        flexDirection: "row", // ícone e texto lado a lado
+        flexDirection: "row",
         alignItems: "center",
         gap: 10,
         padding: 14,

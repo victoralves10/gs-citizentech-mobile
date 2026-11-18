@@ -4,10 +4,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
-// nome e frase ficam aqui, num lugar só (se o grupo mudar, muda só aqui)
 export const NOME_DO_APP = "GaroAvisa";
 export const FRASE_DO_APP = "previsão · alertas · dicas";
 
+// Logo do GaroAvisa (branca no topo azul ou compacta)
 type Props = {
     variante?: "sobreCor" | "compacta";
 };
@@ -36,7 +36,6 @@ export default function Marca({ variante = "sobreCor" }: Props) {
 
     return (
         <View style={estilos.coluna}>
-            {/* quadrado "de vidro": branco bem transparente com borda clarinha */}
             <View style={estilos.icone}>
                 <Ionicons name="partly-sunny" size={44} color={cores.textoSobreCor} />
             </View>
@@ -50,7 +49,7 @@ export default function Marca({ variante = "sobreCor" }: Props) {
 
 function criarEstilos(cores: Cores) {
     return StyleSheet.create({
-        // ---- sobreCor ----
+        // SobreCor
         coluna: {
             alignItems: "center",
             gap: 6,
@@ -73,17 +72,17 @@ function criarEstilos(cores: Cores) {
             letterSpacing: 0.5,
         },
         nomeForte: {
-            fontWeight: "900", // "Avisa" mais grosso que "Garo"
+            fontWeight: "900",
         },
         frase: {
             fontSize: 11,
             color: cores.textoSobreCor,
             opacity: 0.85,
             letterSpacing: 2.5,
-            textTransform: "uppercase", // deixa tudo em maiúsculas
+            textTransform: "uppercase",
         },
 
-        // ---- compacta ----
+        // Compacta
         linhaCompacta: {
             flexDirection: "row",
             alignItems: "center",

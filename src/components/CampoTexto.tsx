@@ -4,9 +4,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
+// Campo de formulário com rótulo, ícone, erro e olho de senha
 type Props = TextInputProps & {
     rotulo: string;
-    icone?: keyof typeof Ionicons.glyphMap; // o "?" quer dizer que é opcional
+    icone?: keyof typeof Ionicons.glyphMap;
     erro?: string;
     senha?: boolean;
     alto?: boolean; // caixa grande, para texto de várias linhas
@@ -23,10 +24,8 @@ export default function CampoTexto({
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
 
-    // controla se a senha está visível. Começa escondida.
     const [senhaVisivel, setSenhaVisivel] = useState(false);
 
-    // a borda fica vermelha quando tem erro
     const corDaBorda = erro ? cores.erro : cores.borda;
 
     return (
@@ -34,20 +33,16 @@ export default function CampoTexto({
             <Text style={estilos.rotulo}>{rotulo}</Text>
 
             <View style={[estilos.caixa, alto && estilos.caixaAlta, { borderColor: corDaBorda }]}>
-                {/* ícone da esquerda (só aparece se foi passado) */}
                 {icone && <Ionicons name={icone} size={20} color={cores.textoSuave} />}
 
                 <TextInput
                     style={[estilos.input, alto && estilos.inputAlto]}
                     multiline={alto}
                     placeholderTextColor={cores.textoSuave}
-                    // se for senha e não estiver visível, mostra bolinhas
                     secureTextEntry={senha && !senhaVisivel}
-                    // "...resto" repassa todas as outras props (value, onChangeText...)
                     {...resto}
                 />
 
-                {/* olho para mostrar/esconder (só em campo de senha) */}
                 {senha && (
                     <Pressable onPress={() => setSenhaVisivel(!senhaVisivel)} hitSlop={10}>
                         <Ionicons
@@ -59,7 +54,6 @@ export default function CampoTexto({
                 )}
             </View>
 
-            {/* mensagem de erro (só aparece se existir) */}
             {erro && <Text style={estilos.erro}>{erro}</Text>}
         </View>
     );
@@ -92,7 +86,7 @@ function criarEstilos(cores: Cores) {
             paddingVertical: 12,
         },
         input: {
-            flex: 1, // ocupa todo o espaço que sobra entre os ícones
+            flex: 1,
             fontSize: 15,
             color: cores.texto,
         },

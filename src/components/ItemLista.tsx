@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
+// Linha de lista: ícone, título, descrição e algo à direita (ou ›)
 type Props = {
     titulo: string;
     descricao?: string;
@@ -28,11 +29,9 @@ export default function ItemLista({
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
 
-    // vermelho quando é uma ação perigosa; senão, as cores normais
     const corTitulo = perigo ? cores.erro : cores.texto;
     const corIcone = perigo ? cores.erro : cores.textoSecundario;
 
-    // a setinha só aparece se o item é tocável e não tem nada na direita
     const mostrarSeta = !!onPress && !direita && !perigo;
 
     return (
@@ -48,7 +47,6 @@ export default function ItemLista({
         >
             {icone && <Ionicons name={icone} size={22} color={corIcone} />}
 
-            {/* textos: flex 1 = ocupa todo o espaço que sobrar no meio */}
             <View style={estilos.textos}>
                 <Text style={[estilos.titulo, { color: corTitulo }, perigo && estilos.negrito]}>
                     {titulo}
@@ -70,10 +68,10 @@ function criarEstilos(cores: Cores) {
             gap: 14,
             paddingVertical: 14,
             paddingHorizontal: 16,
-            minHeight: 54, // altura boa para o dedo
+            minHeight: 54,
         },
         divisor: {
-            borderTopWidth: StyleSheet.hairlineWidth, // a linha mais fina possível na tela
+            borderTopWidth: StyleSheet.hairlineWidth,
             borderTopColor: cores.borda,
         },
         pressionado: {

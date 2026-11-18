@@ -9,7 +9,7 @@ export async function buscarRecentes(): Promise<Lugar[]> {
     return texto ? JSON.parse(texto) : [];
 }
 
-// coloca o lugar em primeiro (tirando a repetição) e guarda só os 5 primeiros
+// o lugar vai para o topo; guarda só os 5 últimos
 export async function salvarRecente(lugar: Lugar): Promise<Lugar[]> {
     const atuais = await buscarRecentes();
     const novos = [lugar, ...atuais.filter((l) => l.id !== lugar.id)].slice(0, MAXIMO);

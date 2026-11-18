@@ -7,6 +7,7 @@ import { diaSemana, porcentagem, temperatura } from "../utils/formatar";
 import { useTema } from "../theme/TemaContext";
 import { Cores, transparente } from "../theme/cores";
 
+// Próximos dias com mínima, máxima e barrinha de temperatura
 type Props = {
     dias: PrevisaoDia[];
 };
@@ -20,7 +21,7 @@ export default function ListaDias({ dias }: Props) {
     const maximas = dias.map((d) => d.temperaturaMaxima ?? 0);
     const menor = Math.min(...minimas);
     const maior = Math.max(...maximas);
-    const faixa = Math.max(1, maior - menor); // evita dividir por zero
+    const faixa = Math.max(1, maior - menor);
 
     return (
         <Cartao semEspaco>

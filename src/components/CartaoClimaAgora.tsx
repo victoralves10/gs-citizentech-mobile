@@ -7,6 +7,7 @@ import { temperatura, tempoAtras } from "../utils/formatar";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
+// Cartão azul com o clima de agora
 type Props = {
     local: LocalResumo;
     clima: ClimaAtual;
@@ -24,10 +25,9 @@ export default function CartaoClimaAgora({ local, clima, atualizadoEm }: Props) 
             end={{ x: 1, y: 1 }}
             style={estilos.cartao}
         >
-            {/* enfeite: bolha de luz no canto */}
             <View style={estilos.bolha} />
 
-            {/* topo: local e quando atualizou */}
+            {/* Local e horário */}
             <View style={estilos.topo}>
                 <Ionicons name="location" size={14} color={cores.textoSobreCor} />
                 <Text style={estilos.local} numberOfLines={1}>
@@ -36,7 +36,7 @@ export default function CartaoClimaAgora({ local, clima, atualizadoEm }: Props) 
                 <Text style={estilos.atualizado}>{tempoAtras(atualizadoEm)}</Text>
             </View>
 
-            {/* meio: ícone, temperatura e condição */}
+            {/* Agora */}
             <View style={estilos.meio}>
                 <Ionicons
                     name={iconeDoClima(clima.categoria, clima.ehDia)}
@@ -49,7 +49,7 @@ export default function CartaoClimaAgora({ local, clima, atualizadoEm }: Props) 
                 </View>
             </View>
 
-            {/* baixo: máxima, mínima e sensação */}
+            {/* Máxima, mínima e sensação */}
             <Text style={estilos.rodape}>
                 Máx {temperatura(clima.temperaturaMaxima)} · Mín{" "}
                 {temperatura(clima.temperaturaMinima)} · Sensação{" "}

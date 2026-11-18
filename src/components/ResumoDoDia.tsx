@@ -1,14 +1,14 @@
-// Previsão completa de um dia (fica no menu do compromisso).
-// Céu, mín/máx, chuva, alertas daquele dia e o aviso de "previsão incerta".
 import { StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Cartao from "./Cartao";
+import AvisoLinha from "./AvisoLinha";
 import { Alerta, PrevisaoDia } from "../models/Previsao";
 import { corDaGravidade, iconeDoAlerta, iconeDoClima } from "../utils/clima";
 import { milimetros, porcentagem, temperatura } from "../utils/formatar";
 import { useTema } from "../theme/TemaContext";
 import { Cores } from "../theme/cores";
 
+// Previsão completa de um dia (no menu do compromisso)
 type Props = {
     dia?: PrevisaoDia; // undefined: o dia está fora dos 16 dias
     alertas: Alerta[]; // só os alertas deste dia
@@ -20,14 +20,10 @@ export default function ResumoDoDia({ dia, alertas }: Props) {
 
     if (!dia) {
         return (
-            <Cartao>
-                <View style={estilos.linha}>
-                    <Ionicons name="time-outline" size={22} color={cores.textoSuave} />
-                    <Text style={estilos.apoio}>
-                        A previsão deste dia ainda não está disponível.
-                    </Text>
-                </View>
-            </Cartao>
+            <AvisoLinha
+                icone="time-outline"
+                texto="A previsão deste dia ainda não está disponível."
+            />
         );
     }
 
@@ -90,11 +86,6 @@ function criarEstilos(cores: Cores) {
             color: cores.texto,
         },
         info: {
-            fontSize: 14,
-            color: cores.textoSecundario,
-        },
-        apoio: {
-            flex: 1,
             fontSize: 14,
             color: cores.textoSecundario,
         },

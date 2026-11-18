@@ -3,9 +3,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTema } from "../theme/TemaContext";
 import { transparente } from "../theme/cores";
 
-// as cores que o selo aceita
 export type CorDoSelo = "primaria" | "secundaria" | "sucesso" | "erro" | "alerta" | "neutro";
 
+// Pílula pequena colorida ("Principal", "Expo Go"...)
 type Props = {
     texto: string;
     cor?: CorDoSelo;
@@ -16,8 +16,7 @@ type Props = {
 export default function Selo({ texto, cor = "primaria", icone, centralizado = false }: Props) {
     const { cores } = useTema();
 
-    // para cada nome de cor: [cor do fundo, cor do texto]
-    // amarelo e secundária usam uma cor de texto mais forte, para dar para ler
+    // [fundo, texto] de cada cor
     const paleta: Record<CorDoSelo, [string, string]> = {
         primaria: [cores.primaria, cores.primaria],
         secundaria: [cores.secundaria, cores.secundariaTexto],
@@ -42,16 +41,15 @@ export default function Selo({ texto, cor = "primaria", icone, centralizado = fa
     );
 }
 
-// aqui não precisa de criarEstilos(cores): as cores vêm direto no componente
 const estilos = StyleSheet.create({
     selo: {
         flexDirection: "row",
         alignItems: "center",
-        alignSelf: "flex-start", // ocupa só o tamanho do texto, não a linha toda
+        alignSelf: "flex-start",
         gap: 4,
         paddingHorizontal: 10,
         paddingVertical: 3,
-        borderRadius: 999, // bem arredondado = formato de pílula
+        borderRadius: 999,
     },
     centralizado: {
         alignSelf: "center",

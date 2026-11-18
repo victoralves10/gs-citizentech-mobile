@@ -1,3 +1,4 @@
+// Transforma os dados da API em texto para a tela
 const VAZIO = "--";
 
 const DIAS_CURTOS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
@@ -17,11 +18,9 @@ const MESES = [
     "dezembro",
 ];
 
-// ---------------------------------------------------------------------------
-// NÚMEROS
-// ---------------------------------------------------------------------------
+// Números
 
-// 24.3 → "24°"   (-0.4 vira "0°", e não "-0°")
+// 24.3 → "24°"
 export function temperatura(valor: number | null | undefined): string {
     if (valor == null) return VAZIO;
     const arredondado = Math.round(valor);
@@ -40,29 +39,21 @@ export function velocidade(valor: number | null | undefined): string {
     return `${Math.round(valor)} km/h`;
 }
 
-// 2.35 → "2,4 mm"   (com vírgula, do jeito brasileiro)
+// 2.35 → "2,4 mm"
 export function milimetros(valor: number | null | undefined): string {
     if (valor == null) return VAZIO;
     return `${valor.toFixed(1).replace(".", ",")} mm`;
 }
 
-// ---------------------------------------------------------------------------
-// DATAS
-// A API manda dois tipos de data:
-//   - data e hora do LOCAL, sem fuso: "2026-11-17T14:00" ou só "2026-11-17"
-//     → a gente lê os pedaços do texto, sem converter fuso (senão o dia
-//       ou a hora podem "pular" para o errado)
-//   - um instante, com o "Z" no fim: "2026-11-17T13:00:00Z"
-//     → esse pode virar Date normalmente (usado só no tempoAtras)
-// ---------------------------------------------------------------------------
+// Datas (lidas pelo texto, sem converter fuso)
 
-// "2026-11-18" (ou "2026-11-18T14:00") → { ano: 2026, mes: 11, dia: 18 }
+// "2026-11-18" → { ano: 2026, mes: 11, dia: 18 }
 function lerDia(texto: string) {
     const [ano, mes, dia] = texto.slice(0, 10).split("-").map(Number);
     return { ano, mes, dia };
 }
 
-// diferença em dias entre a data e hoje (0 = hoje, 1 = amanhã, -1 = ontem)
+// 0 = hoje, 1 = amanhã, -1 = ontem
 function diasAPartirDeHoje(texto: string): number {
     const { ano, mes, dia } = lerDia(texto);
     const data = new Date(ano, mes - 1, dia);
@@ -71,18 +62,9 @@ function diasAPartirDeHoje(texto: string): number {
     return Math.round((data.getTime() - hoje.getTime()) / 86400000);
 }
 
-// dia da semana (0 = domingo ... 6 = sábado)
 function diaDaSemana(texto: string): number {
     const { ano, mes, dia } = lerDia(texto);
     return new Date(ano, mes - 1, dia).getDay();
-}
-
-// a data de hoje no formato da API: "2026-11-17"
-export function diaDeHoje(): string {
-    const agora = new Date();
-    const mes = String(agora.getMonth() + 1).padStart(2, "0");
-    const dia = String(agora.getDate()).padStart(2, "0");
-    return `${agora.getFullYear()}-${mes}-${dia}`;
 }
 
 // "2026-11-17T14:00" → "14h"
@@ -110,7 +92,7 @@ export function dataCurta(texto: string | null | undefined): string {
     return `${DIAS_CURTOS[diaDaSemana(texto)]}, ${dd}/${mm}`;
 }
 
-// "2026-11-18" → "Hoje" / "Qua"   (para a lista de próximos dias)
+// "2026-11-18" → "Hoje" / "Qua"
 export function diaSemana(texto: string | null | undefined): string {
     if (!texto) return VAZIO;
     if (diasAPartirDeHoje(texto) === 0) return "Hoje";
@@ -139,11 +121,25 @@ export function tempoAtras(texto: string | null | undefined): string {
     return dias === 1 ? "há 1 dia" : `há ${dias} dias`;
 }
 
-// ---------------------------------------------------------------------------
-// LUGAR (resultado da busca de lugares)
-// ---------------------------------------------------------------------------
+// Textos
 
-// "São Paulo, São Paulo · Brasil" (sem repetir a cidade quando ela é o próprio lugar)
+// "Bom dia" até 11h59, "Boa tarde" até 17h59, depois "Boa noite"
+export function saudacao(): string {
+    const hora = new Date().getHours();
+    if (hora < 12) return "Bom dia";
+    if (hora < 18) return "Boa tarde";
+    return "Boa noite";
+}
+
+// "Victor Alves" → "VA"
+export function iniciais(nome?: string): string {
+    if (!nome) return "?";
+    const partes = nome.trim().split(/\s+/);
+    const ultima = partes.length > 1 ? partes[partes.length - 1].charAt(0) : "";
+    return (partes[0].charAt(0) + ultima).toUpperCase();
+}
+
+// "São Paulo, São Paulo · Brasil" (sem repetir a cidade)
 export function descricaoDoLugar(lugar: {
     nome: string;
     cidade: string;
