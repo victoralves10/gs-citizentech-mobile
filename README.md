@@ -74,15 +74,20 @@ src/
   storage/      o que fica salvo no celular
   theme/        cores e tema claro/escuro
   utils/        formatação, datas, ícones e confirmação
-  validacoes/   regras dos formulários (iguais às da API)
+  validacoes/   regras dos formulários
 ```
 
 Fluxo: tela → hook → service → API.
 
 ## Publicação
 
-O app está no Firebase App Distribution. A tela Sobre o App mostra o hash do commit
-usado no build.
+O APK está no Firebase App Distribution.
+
+- Link de convite: <https://appdistribution.firebase.dev/i/55cf0dae86eab266>
+- Abra o link no celular Android, entre com o seu e-mail e toque em "Baixar".
+- O convite também chega por e-mail, de firebase-noreply@google.com (confira o spam).
+
+A tela Sobre o App mostra o hash do commit usado no build.
 
 ## Vídeo
 

@@ -10,6 +10,8 @@
             "supportsTablet": true
         },
         "android": {
+            "package": "br.com.fiap.garoavisa",
+            "versionCode": 1,
             "adaptiveIcon": {
                 "backgroundColor": "#1E88E5",
                 "foregroundImage": "./assets/android-icon-foreground.png",
@@ -20,6 +22,14 @@
         },
         "web": {
             "favicon": "./assets/favicon.png"
-        }
+        },
+        "extra": {
+            "commit": "477c4aa",
+            "dataBuild": "19/11/2026 07:09",
+            "eas": {
+                "projectId": "ad274922-381a-464a-a4b0-50934550f58e"
+            }
+        },
+        "owner": "victoralves10"
     }
 }
