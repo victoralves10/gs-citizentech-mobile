@@ -125,9 +125,10 @@ export default function SecaoCompromissos({ c, dias = [], alertas = [] }: Props)
                     placeholder="Ex.: Reunião, aniversário, consulta"
                     value={c.nome}
                     onChangeText={c.setNome}
+                    erro={c.erros.nome}
                     maxLength={80}
                 />
-                <SeletorData rotulo="Data" valor={c.data} onMudar={c.setData} />
+                <SeletorData rotulo="Data" valor={c.data} onMudar={c.setData} erro={c.erros.data} />
             </JanelaEdicao>
         </View>
     );

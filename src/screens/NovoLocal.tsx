@@ -64,6 +64,7 @@ export default function NovoLocal() {
                         placeholder="Ex.: Casa, Trabalho, Escola"
                         value={novo.apelido}
                         onChangeText={novo.setApelido}
+                        erro={novo.erros.apelido}
                         maxLength={50}
                     />
 

@@ -189,6 +189,7 @@ export default function MeusLocais() {
                     placeholder="Ex.: Casa, Trabalho, Escola"
                     value={janela.apelido}
                     onChangeText={janela.setApelido}
+                    erro={janela.erroCampo}
                     maxLength={50}
                     autoFocus
                 />

@@ -134,6 +134,7 @@ export default function Perfil() {
                     icone="person-outline"
                     value={campos.nome}
                     onChangeText={campos.setNome}
+                    erro={perfil.erros.nome}
                     maxLength={100}
                     autoFocus
                 />
@@ -154,6 +155,7 @@ export default function Perfil() {
                     senha
                     value={campos.senhaAtual}
                     onChangeText={campos.setSenhaAtual}
+                    erro={perfil.erros.senhaAtual}
                 />
                 <CampoTexto
                     rotulo="Nova senha"
@@ -162,6 +164,7 @@ export default function Perfil() {
                     placeholder="Mínimo de 6 caracteres"
                     value={campos.novaSenha}
                     onChangeText={campos.setNovaSenha}
+                    erro={perfil.erros.novaSenha}
                 />
                 <CampoTexto
                     rotulo="Confirmar nova senha"
@@ -169,6 +172,7 @@ export default function Perfil() {
                     senha
                     value={campos.confirmacao}
                     onChangeText={campos.setConfirmacao}
+                    erro={perfil.erros.confirmacao}
                 />
             </JanelaEdicao>
         </TelaBase>

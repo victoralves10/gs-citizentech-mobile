@@ -21,6 +21,23 @@ O app só mostra informações: toda a regra de negócio fica na API Java
 
 Exclusões (local, compromisso, conta e buscas recentes) pedem confirmação dupla.
 
+## Validações
+
+Todo formulário é conferido no app antes de chamar a API, e o erro aparece embaixo
+do campo. Os limites são os mesmos da API Java, que valida de novo (Bean Validation)
+e devolve a mensagem que o app mostra.
+
+| Formulário  | O que é conferido                                                                   | Onde                                  |
+| ----------- | ----------------------------------------------------------------------------------- | ------------------------------------- |
+| Login       | e-mail obrigatório e válido, senha obrigatória                                      | `validacoes/authValidacoes.ts`        |
+| Cadastro    | nome (3 a 100), e-mail (até 100), senha (6 a 72), confirmação igual                 | `validacoes/authValidacoes.ts`        |
+| Perfil      | nome (3 a 100); senha atual, nova senha (6 a 72 e diferente da atual) e confirmação | `validacoes/perfilValidacoes.ts`      |
+| Local       | apelido obrigatório (até 50)                                                        | `validacoes/localValidacoes.ts`       |
+| Compromisso | nome obrigatório (até 80), data escolhida e não pode estar no passado               | `validacoes/compromissoValidacoes.ts` |
+
+Camadas: a tela mostra o erro no campo → o hook chama a validação e só chama o service
+se estiver tudo certo → as regras ficam em `src/validacoes/`.
+
 ## Tecnologias
 
 React Native, Expo SDK 58, TypeScript, React Navigation, Axios, AsyncStorage,
@@ -56,7 +73,8 @@ src/
   services/     chamadas HTTP (API Java e Open-Meteo)
   storage/      o que fica salvo no celular
   theme/        cores e tema claro/escuro
-  utils/        formatação, datas, ícones, validação e confirmação
+  utils/        formatação, datas, ícones e confirmação
+  validacoes/   regras dos formulários (iguais às da API)
 ```
 
 Fluxo: tela → hook → service → API.

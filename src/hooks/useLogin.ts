@@ -2,12 +2,8 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { mensagemDeErro } from "../services/api";
 import { toastErro, toastSucesso } from "../utils/toast";
-import { erroDoEmail, semErros } from "../utils/validacao";
-
-type Erros = {
-    email?: string;
-    senha?: string;
-};
+import { Erros, temErros } from "../validacoes/regras";
+import { CamposLogin, validarLogin } from "../validacoes/authValidacoes";
 
 // Login: valida os campos e entra pela API
 export function useLogin() {
@@ -15,16 +11,13 @@ export function useLogin() {
 
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
-    const [erros, setErros] = useState<Erros>({});
+    const [erros, setErros] = useState<Erros<keyof CamposLogin>>({});
     const [carregando, setCarregando] = useState(false);
 
     async function enviar() {
-        const novosErros: Erros = {
-            email: erroDoEmail(email),
-            senha: senha ? undefined : "Informe a senha.",
-        };
+        const novosErros = validarLogin({ email, senha });
         setErros(novosErros);
-        if (!semErros(novosErros)) return;
+        if (temErros(novosErros)) return;
 
         setCarregando(true);
         try {

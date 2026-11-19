@@ -49,9 +49,10 @@ type Props = {
     rotulo: string;
     valor: string; // "2026-11-25" ou ""
     onMudar: (valor: string) => void;
+    erro?: string;
 };
 
-export default function SeletorData({ rotulo, valor, onMudar }: Props) {
+export default function SeletorData({ rotulo, valor, onMudar, erro }: Props) {
     const { cores } = useTema();
     const estilos = criarEstilos(cores);
     const [aberto, setAberto] = useState(false);
@@ -66,7 +67,7 @@ export default function SeletorData({ rotulo, valor, onMudar }: Props) {
             <Text style={estilos.rotulo}>{rotulo}</Text>
 
             <Pressable
-                style={[estilos.campo, aberto && estilos.campoAberto]}
+                style={[estilos.campo, aberto && estilos.campoAberto, erro && estilos.campoErro]}
                 onPress={() => setAberto(!aberto)}
             >
                 <Ionicons name="calendar-outline" size={20} color={cores.textoSuave} />
@@ -81,6 +82,8 @@ export default function SeletorData({ rotulo, valor, onMudar }: Props) {
                     color={cores.textoSuave}
                 />
             </Pressable>
+
+            {erro && <Text style={estilos.erro}>{erro}</Text>}
 
             {aberto ? (
                 <Calendar
@@ -145,6 +148,13 @@ function criarEstilos(cores: Cores) {
         },
         campoAberto: {
             borderColor: cores.primaria,
+        },
+        campoErro: {
+            borderColor: cores.erro,
+        },
+        erro: {
+            fontSize: 13,
+            color: cores.erro,
         },
         texto: {
             flex: 1,

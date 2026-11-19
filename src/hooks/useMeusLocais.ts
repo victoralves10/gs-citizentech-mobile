@@ -6,6 +6,8 @@ import { mensagemDeErro } from "../services/api";
 import { ESPERA_BUSCA, TAMANHO_PAGINA } from "../config/constantes";
 import { confirmarExclusao } from "../utils/confirmar";
 import { toastErro, toastSucesso } from "../utils/toast";
+import { temErros } from "../validacoes/regras";
+import { validarApelido } from "../validacoes/localValidacoes";
 
 type Modo = "inicio" | "busca" | "mais" | "puxar";
 
@@ -26,7 +28,8 @@ export function useMeusLocais() {
     // janela de trocar apelido
     const [editando, setEditando] = useState<LocalCard | null>(null);
     const [apelido, setApelido] = useState("");
-    const [erroApelido, setErroApelido] = useState<string>();
+    const [erroApelido, setErroApelido] = useState<string>(); // erro do campo
+    const [erroApi, setErroApi] = useState<string>();
     const [salvando, setSalvando] = useState(false);
 
     const ultimoPedido = useRef(0);
@@ -146,12 +149,16 @@ export function useMeusLocais() {
         setEditando(local);
         setApelido(local.apelido);
         setErroApelido(undefined);
+        setErroApi(undefined);
     }
 
     async function salvarApelido() {
         if (!editando) return;
-        if (!apelido.trim()) return setErroApelido("Informe o apelido.");
+        const erros = validarApelido(apelido);
+        setErroApelido(erros.apelido);
+        if (temErros(erros)) return;
 
+        setErroApi(undefined);
         setSalvando(true);
         try {
             trocarNaLista(
@@ -164,7 +171,7 @@ export function useMeusLocais() {
             toastSucesso("Apelido atualizado!");
             setEditando(null);
         } catch (e) {
-            setErroApelido(mensagemDeErro(e));
+            setErroApi(mensagemDeErro(e));
         } finally {
             setSalvando(false);
         }
@@ -205,7 +212,8 @@ export function useMeusLocais() {
             aberta: editando !== null,
             apelido,
             setApelido,
-            erro: erroApelido,
+            erroCampo: erroApelido,
+            erro: erroApi,
             salvando,
             abrir: abrirApelido,
             fechar: () => setEditando(null),

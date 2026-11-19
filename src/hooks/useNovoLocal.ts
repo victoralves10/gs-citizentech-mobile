@@ -4,6 +4,8 @@ import { locaisService } from "../services/locaisService";
 import { mensagemDeErro } from "../services/api";
 import { toastSucesso } from "../utils/toast";
 import { useBuscaLugares } from "./useBuscaLugares";
+import { Erros, temErros } from "../validacoes/regras";
+import { validarApelido } from "../validacoes/localValidacoes";
 
 // Novo local: 1) buscar o lugar  2) dar um apelido e salvar
 export function useNovoLocal(lugarInicial?: Lugar) {
@@ -13,7 +15,8 @@ export function useNovoLocal(lugarInicial?: Lugar) {
     const [apelido, setApelido] = useState("");
     const [receberAlertas, setReceberAlertas] = useState(true);
     const [salvando, setSalvando] = useState(false);
-    const [erro, setErro] = useState<string>();
+    const [erros, setErros] = useState<Erros<"apelido">>({});
+    const [erro, setErro] = useState<string>(); // erro que veio da API
 
     function escolher(lugar: Lugar) {
         setEscolhido(lugar);
@@ -28,10 +31,9 @@ export function useNovoLocal(lugarInicial?: Lugar) {
     // devolve true quando salvou (a tela então volta)
     async function salvar(): Promise<boolean> {
         if (!escolhido) return false;
-        if (!apelido.trim()) {
-            setErro("Dê um apelido para o local. Ex.: Casa, Trabalho.");
-            return false;
-        }
+        const novosErros = validarApelido(apelido);
+        setErros(novosErros);
+        if (temErros(novosErros)) return false;
 
         setErro(undefined);
         setSalvando(true);
@@ -67,6 +69,7 @@ export function useNovoLocal(lugarInicial?: Lugar) {
         receberAlertas,
         setReceberAlertas,
         salvando,
+        erros,
         erro,
         salvar,
     };

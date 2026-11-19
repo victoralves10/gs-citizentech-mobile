@@ -2,14 +2,8 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { mensagemDeErro } from "../services/api";
 import { toastErro, toastSucesso } from "../utils/toast";
-import { erroDoEmail, semErros, TAMANHO_MINIMO_SENHA } from "../utils/validacao";
-
-type Erros = {
-    nome?: string;
-    email?: string;
-    senha?: string;
-    confirmarSenha?: string;
-};
+import { Erros, temErros } from "../validacoes/regras";
+import { CamposCadastro, validarCadastro } from "../validacoes/authValidacoes";
 
 // Cadastro: valida os campos, cria a conta e já entra
 export function useCadastro() {
@@ -19,21 +13,13 @@ export function useCadastro() {
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
     const [confirmarSenha, setConfirmarSenha] = useState("");
-    const [erros, setErros] = useState<Erros>({});
+    const [erros, setErros] = useState<Erros<keyof CamposCadastro>>({});
     const [carregando, setCarregando] = useState(false);
 
     async function enviar() {
-        const novosErros: Erros = {
-            nome: nome.trim().length < 3 ? "Informe seu nome (mínimo de 3 letras)." : undefined,
-            email: erroDoEmail(email),
-            senha:
-                senha.length < TAMANHO_MINIMO_SENHA
-                    ? `A senha precisa ter no mínimo ${TAMANHO_MINIMO_SENHA} caracteres.`
-                    : undefined,
-            confirmarSenha: confirmarSenha !== senha ? "As senhas não são iguais." : undefined,
-        };
+        const novosErros = validarCadastro({ nome, email, senha, confirmarSenha });
         setErros(novosErros);
-        if (!semErros(novosErros)) return;
+        if (temErros(novosErros)) return;
 
         setCarregando(true);
         try {

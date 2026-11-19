@@ -6,6 +6,8 @@ import { usuarioService } from "../services/usuarioService";
 import { mensagemDeErro } from "../services/api";
 import { confirmarExclusao } from "../utils/confirmar";
 import { toastErro, toastSucesso } from "../utils/toast";
+import { Erros, temErros } from "../validacoes/regras";
+import { CamposSenha, validarNome, validarTrocaDeSenha } from "../validacoes/perfilValidacoes";
 
 type Janela = "nome" | "senha" | null;
 
@@ -18,7 +20,8 @@ export function usePerfil() {
     const [senhaAtual, setSenhaAtual] = useState("");
     const [novaSenha, setNovaSenha] = useState("");
     const [confirmacao, setConfirmacao] = useState("");
-    const [erro, setErro] = useState<string>();
+    const [erros, setErros] = useState<Erros<"nome" | keyof CamposSenha>>({});
+    const [erro, setErro] = useState<string>(); // erro que veio da API
     const [salvando, setSalvando] = useState(false);
     const [excluindo, setExcluindo] = useState(false);
 
@@ -38,22 +41,18 @@ export function usePerfil() {
         setSenhaAtual("");
         setNovaSenha("");
         setConfirmacao("");
+        setErros({});
         setErro(undefined);
         setJanela(qual);
     }
 
     async function salvar() {
-        if (janela === "nome" && !nome.trim()) {
-            return setErro("Informe o seu nome.");
-        }
-        if (janela === "senha") {
-            if (!senhaAtual || !novaSenha) {
-                return setErro("Preencha a senha atual e a nova senha.");
-            }
-            if (novaSenha !== confirmacao) {
-                return setErro("A confirmação não é igual à nova senha.");
-            }
-        }
+        const novosErros =
+            janela === "nome"
+                ? validarNome(nome)
+                : validarTrocaDeSenha({ senhaAtual, novaSenha, confirmacao });
+        setErros(novosErros);
+        if (temErros(novosErros)) return;
 
         setErro(undefined);
         setSalvando(true);
@@ -101,6 +100,7 @@ export function usePerfil() {
     return {
         usuario,
         janela,
+        erros,
         erro,
         salvando,
         excluindo,
